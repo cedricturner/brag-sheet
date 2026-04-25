@@ -116,6 +116,27 @@
     border-bottom: 1px solid var(--rule);
   }
 
+  /* Masked name */
+  .ae-masked {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    background: #ccc9c2;
+    color: #ccc9c2;
+    border-radius: 3px;
+    padding: 2px 10px;
+    letter-spacing: 3px;
+    user-select: none;
+  }
+  .mask-note {
+    font-size: 12px;
+    color: var(--faint);
+    font-style: italic;
+    margin-top: 20px;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule);
+  }
+
   /* Number callouts */
   .numbers-grid {
     display: grid;
@@ -360,27 +381,27 @@
         <tr><th>#</th><th>Industry</th><th>Contract Value</th></tr>
       </thead>
       <tbody>
-        <tr><td class="deal-muted">1</td><td>Healthcare Payments</td><td class="deal-amt"><span class="hl hl-win">$542,679</span></td></tr>
-        <tr><td class="deal-muted">2</td><td>Automotive Services</td><td class="deal-amt">$182,952</td></tr>
-        <tr><td class="deal-muted">3</td><td>Energy & Utilities</td><td class="deal-amt">$176,925</td></tr>
-        <tr><td class="deal-muted">4</td><td>Media & Publishing</td><td class="deal-amt">$172,598</td></tr>
-        <tr><td class="deal-muted">5</td><td>Heavy Equipment</td><td class="deal-amt">$153,560</td></tr>
-        <tr><td class="deal-muted">6</td><td>Home Healthcare</td><td class="deal-amt">$143,038</td></tr>
-        <tr><td class="deal-muted">7</td><td>Nonprofit Technology</td><td class="deal-amt">$140,640</td></tr>
-        <tr><td class="deal-muted">8</td><td>Healthcare Technology</td><td class="deal-amt">$132,600</td></tr>
-        <tr><td class="deal-muted">9</td><td>Personal Finance</td><td class="deal-amt">$123,751</td></tr>
-        <tr><td class="deal-muted">10</td><td>Healthcare</td><td class="deal-amt">$120,000</td></tr>
-        <tr><td class="deal-muted">11</td><td>Specialty Retail</td><td class="deal-amt">$118,800</td></tr>
-        <tr><td class="deal-muted">12</td><td>Retail Technology</td><td class="deal-amt">$115,418</td></tr>
-        <tr><td class="deal-muted">13</td><td>Financial Services</td><td class="deal-amt">$103,000</td></tr>
-        <tr><td class="deal-muted">14</td><td>Insurance</td><td class="deal-amt">$100,440</td></tr>
+        <tr><td class="deal-muted">1</td><td>Healthcare payments company</td><td class="deal-amt"><span class="hl hl-win">$542,679</span></td></tr>
+        <tr><td class="deal-muted">2</td><td>Automotive services company</td><td class="deal-amt">$182,952</td></tr>
+        <tr><td class="deal-muted">3</td><td>Energy & utilities company</td><td class="deal-amt">$176,925</td></tr>
+        <tr><td class="deal-muted">4</td><td>Media & publishing company</td><td class="deal-amt">$172,598</td></tr>
+        <tr><td class="deal-muted">5</td><td>Heavy equipment company</td><td class="deal-amt">$153,560</td></tr>
+        <tr><td class="deal-muted">6</td><td>Home healthcare company</td><td class="deal-amt">$143,038</td></tr>
+        <tr><td class="deal-muted">7</td><td>Nonprofit technology company</td><td class="deal-amt">$140,640</td></tr>
+        <tr><td class="deal-muted">8</td><td>Healthcare technology company</td><td class="deal-amt">$132,600</td></tr>
+        <tr><td class="deal-muted">9</td><td>Personal finance company</td><td class="deal-amt">$123,751</td></tr>
+        <tr><td class="deal-muted">10</td><td>Healthcare company</td><td class="deal-amt">$120,000</td></tr>
+        <tr><td class="deal-muted">11</td><td>Specialty retail company</td><td class="deal-amt">$118,800</td></tr>
+        <tr><td class="deal-muted">12</td><td>Retail technology company</td><td class="deal-amt">$115,418</td></tr>
+        <tr><td class="deal-muted">13</td><td>Financial services company</td><td class="deal-amt">$103,000</td></tr>
+        <tr><td class="deal-muted">14</td><td>Insurance company</td><td class="deal-amt">$100,440</td></tr>
       </tbody>
     </table>
 
     <div class="sub-label">AE attainment · Sep 2024 – present</div>
 
     <div class="ae-item">
-      <div class="ae-name">Gertrude</div>
+      <div class="ae-name"><span class="ae-masked">██████████</span></div>
       <div class="ae-attainment">113.69% New ARR attainment · promoted to Customer Sales Director</div>
       <ul>
         <li>Q3 FY2025 · exceeded quota</li>
@@ -391,7 +412,7 @@
     </div>
 
     <div class="ae-item">
-      <div class="ae-name">Chester</div>
+      <div class="ae-name"><span class="ae-masked">██████████</span></div>
       <div class="ae-attainment">136.93% New ARR attainment · promoted to Senior Deal Desk Analyst</div>
       <ul>
         <li>Q3 FY2025 · exceeded quota</li>
@@ -401,12 +422,14 @@
     </div>
 
     <div class="ae-item">
-      <div class="ae-name">Willard</div>
+      <div class="ae-name"><span class="ae-masked">██████████</span></div>
       <div class="ae-attainment">promoted to Enterprise Account Executive, Southeast · Q1 FY2027</div>
       <ul>
         <li>Q1 FY2027 · exceeded quota · earned promotion to Enterprise</li>
       </ul>
     </div>
+
+    <p class="mask-note">* names masked to protect the identity of account executives</p>
   </div>
 
   <!-- CAREER -->
