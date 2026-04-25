@@ -5,915 +5,140 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cedric Turner II</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
-  background: #ffffff;
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 13px;
-  color: #000000;
-  padding: 20px;
-  max-width: 780px;
-  margin: 0 auto;
-}
+  body {
+    background: #faf9f7;
+    color: #1a1a1a;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    padding: 60px 24px 120px;
+  }
 
-.panel {
-  background: #d4d0c8;
-  border-top: 2px solid #ffffff;
-  border-left: 2px solid #ffffff;
-  border-right: 2px solid #404040;
-  border-bottom: 2px solid #404040;
-  margin-bottom: 12px;
-}
-.panel-title {
-  background: #000000;
-  color: #ffffff;
-  font-family: 'Courier New', monospace;
-  font-size: 11px;
-  font-weight: bold;
-  padding: 3px 6px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  user-select: none;
-}
-.panel-title-btns { display: flex; gap: 2px; }
-.ptb {
-  width: 14px; height: 12px;
-  background: #d4d0c8;
-  border-top: 1px solid #ffffff;
-  border-left: 1px solid #ffffff;
-  border-right: 1px solid #404040;
-  border-bottom: 1px solid #404040;
-  font-size: 8px;
-  display: flex; align-items: center; justify-content: center;
-  color: #000; font-family: 'Courier New', monospace;
-}
-.panel-body {
-  background: #ffffff;
-  border: 2px inset #808080;
-  margin: 4px;
-  padding: 12px 14px;
-}
+  .wrap {
+    max-width: 560px;
+    margin: 0 auto;
+  }
 
-.site-name { font-size: 26px; font-weight: bold; margin-bottom: 2px; }
-.site-sub { font-size: 11px; color: #404040; margin-bottom: 10px; }
-.header-links { font-size: 11px; display: flex; gap: 16px; flex-wrap: wrap; }
-.header-links a { color: #000000; text-decoration: underline; }
+  header {
+    margin-bottom: 72px;
+  }
 
-.sec {
-  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
-  color: #808080; margin-bottom: 6px;
-  border-bottom: 1px solid #d0d0d0; padding-bottom: 4px;
-}
+  header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
 
-ul.plain { list-style: none; padding: 0; }
-ul.plain li {
-  font-size: 12px; color: #000; line-height: 1.8;
-  padding-left: 14px; position: relative;
-}
-ul.plain li::before { content: '>'; position: absolute; left: 0; color: #808080; }
+  header p {
+    color: #888;
+    font-size: 14px;
+  }
 
-.contrib-title { font-size: 13px; font-weight: bold; margin-bottom: 6px; }
-.contrib-impact {
-  background: #f4f4f4; border-left: 3px solid #000000;
-  padding: 6px 10px; font-size: 11px; color: #222;
-  line-height: 1.6; margin-top: 6px;
-}
-.contrib-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
-.tag {
-  font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
-  border: 1px solid #808080; padding: 1px 5px;
-  color: #404040; background: #f4f4f4;
-}
+  section {
+    margin-bottom: 52px;
+  }
 
-/* deal table */
-.deal-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 6px; }
-.deal-table th {
-  font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
-  color: #808080; border-bottom: 1px solid #d0d0d0;
-  padding: 4px 8px; text-align: left; font-weight: normal;
-}
-.deal-table td {
-  padding: 5px 8px; border-bottom: 1px solid #f0f0f0;
-  color: #000; vertical-align: middle;
-}
-.deal-table tr:last-child td { border-bottom: none; }
-.deal-table tr:hover td { background: #f8f8f8; }
-.deal-amt { font-weight: bold; white-space: nowrap; }
-.deal-delta { color: #006000; font-size: 10px; white-space: nowrap; }
-.deal-source { font-size: 9px; color: #808080; font-style: italic; }
+  .section-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #aaa;
+    margin-bottom: 20px;
+  }
 
-/* quarterly AE table */
-.qtr-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 8px; }
-.qtr-table th {
-  font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
-  color: #808080; border-bottom: 1px solid #d0d0d0;
-  padding: 4px 8px; text-align: left; font-weight: normal;
-}
-.qtr-table td {
-  padding: 6px 8px; border-bottom: 1px solid #f0f0f0;
-  vertical-align: middle; font-size: 11px;
-}
-.qtr-table tr:last-child td { border-bottom: none; }
-.qtr-label { font-weight: bold; color: #000; white-space: nowrap; }
-.qtr-arr { font-weight: bold; white-space: nowrap; }
-.qtr-arr.high { color: #006000; }
-.qtr-exceeded {
-  font-size: 9px; background: #f0f0f0;
-  border: 1px solid #d0d0d0; padding: 1px 6px;
-  white-space: nowrap; color: #000;
-}
-.qtr-exceeded.yes { background: #e8f5e8; border-color: #aaddaa; color: #006000; }
-.qtr-note { font-size: 10px; color: #808080; font-style: italic; margin-top: 6px; }
+  ul {
+    list-style: none;
+  }
 
-.ae-section { margin-bottom: 16px; }
-.ae-section:last-child { margin-bottom: 0; }
-.ae-header {
-  font-size: 11px; font-weight: bold;
-  margin-bottom: 8px; color: #000;
-  display: flex; align-items: center; gap: 8px;
-}
-.ae-total {
-  font-size: 10px; color: #808080; font-weight: normal;
-}
+  li {
+    border-top: 1px solid #ece9e4;
+    padding: 16px 0;
+  }
 
-.numbers-row {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 1px; background: #d0d0d0; border: 1px solid #808080;
-}
-@media(max-width:500px) { .numbers-row { grid-template-columns: 1fr 1fr; } }
-.num-cell { background: #ffffff; padding: 14px 12px; }
-.num-val { font-size: 22px; font-weight: bold; line-height: 1; margin-bottom: 3px; }
-.num-label { font-size: 10px; color: #606060; line-height: 1.4; }
-.num-sub { font-size: 9px; color: #909090; margin-top: 3px; font-style: italic; }
+  li:last-child {
+    border-bottom: 1px solid #ece9e4;
+  }
 
-.div-line { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #ffffff; margin: 14px 0; }
+  a.item {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
 
-.win-btn {
-  background: #d4d0c8;
-  border-top: 2px solid #ffffff;
-  border-left: 2px solid #ffffff;
-  border-right: 2px solid #404040;
-  border-bottom: 2px solid #404040;
-  font-family: 'Courier New', monospace;
-  font-size: 11px; padding: 3px 12px;
-  cursor: pointer; color: #000;
-  display: inline-block; margin-top: 8px;
-}
-.win-btn:active {
-  border-top: 2px solid #404040; border-left: 2px solid #404040;
-  border-right: 2px solid #ffffff; border-bottom: 2px solid #ffffff;
-}
-.btn-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  a.item:hover .item-title { text-decoration: underline; text-underline-offset: 3px; }
 
-.statusbar {
-  background: #d4d0c8; border-top: 1px solid #808080;
-  padding: 2px 8px; font-size: 10px; color: #444;
-  display: flex; gap: 12px;
-}
-.sb-cell { border-right: 1px solid #808080; padding-right: 12px; }
+  .item-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-bottom: 3px;
+  }
 
-.influence-item {
-  border: 1px solid #d0d0d0; margin-bottom: 10px; background: #f8f8f8;
-}
-.influence-item:last-child { margin-bottom: 0; }
-.influence-head {
-  background: #e8e8e8; border-bottom: 1px solid #d0d0d0;
-  padding: 4px 10px; font-size: 11px; font-weight: bold; color: #000;
-}
-.influence-body {
-  padding: 8px 10px; font-size: 11px; color: #222; line-height: 1.65;
-}
-.influence-who { font-size: 10px; color: #808080; margin-top: 5px; letter-spacing: 0.5px; }
-
-.note-box {
-  background: #f8f8f8; border: 1px solid #d0d0d0;
-  border-left: 3px solid #808080;
-  padding: 6px 10px; font-size: 10px; color: #808080;
-  margin-top: 8px; font-style: italic;
-}
-
-/* ── MODAL ── */
-.modal-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.6); backdrop-filter: blur(3px);
-  z-index: 1000; align-items: center; justify-content: center; padding: 20px;
-}
-.modal-overlay.open { display: flex; }
-.modal-win {
-  background: #d4d0c8;
-  border-top: 2px solid #ffffff; border-left: 2px solid #ffffff;
-  border-right: 2px solid #404040; border-bottom: 2px solid #404040;
-  width: 100%; max-width: 600px; max-height: 82vh;
-  display: flex; flex-direction: column;
-  box-shadow: 4px 4px 0 rgba(0,0,0,0.4);
-}
-.modal-title {
-  background: #000000; color: #ffffff; font-size: 11px; font-weight: bold;
-  padding: 3px 6px; display: flex; align-items: center; justify-content: space-between;
-  flex-shrink: 0;
-}
-.modal-body {
-  background: #ffffff; border: 2px inset #808080;
-  margin: 4px; padding: 14px; overflow-y: auto; flex: 1;
-}
-.modal-footer {
-  background: #d4d0c8; border-top: 1px solid #808080;
-  padding: 6px 8px; display: flex; justify-content: flex-end; gap: 6px; flex-shrink: 0;
-}
-
-.calc-screen-wrap { background: #000000; border: 1px inset #555; padding: 8px 12px; margin-bottom: 12px; }
-.calc-screen-label { font-size: 9px; color: #3a5a20; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; }
-.calc-screen-val { font-size: 32px; color: #7cbb30; text-align: right; letter-spacing: 2px; line-height: 1; text-shadow: 0 0 8px rgba(100,180,40,0.5); }
-.s-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; }
-@media(max-width:420px) { .s-grid { grid-template-columns: 1fr; } }
-.s-row { margin-bottom: 2px; }
-.s-top { display: flex; justify-content: space-between; font-size: 10px; color: #444; margin-bottom: 3px; }
-.s-top strong { color: #000080; }
-input[type=range] { width: 100%; appearance: none; height: 3px; background: #808080; cursor: pointer; outline: none; }
-input[type=range]::-webkit-slider-thumb { appearance: none; width: 10px; height: 14px; background: #d4d0c8; border-top: 1px solid #fff; border-left: 1px solid #fff; border-right: 1px solid #404040; border-bottom: 1px solid #404040; cursor: pointer; }
-.calc-out { margin-top: 10px; border-top: 1px solid #d0d0d0; padding-top: 8px; font-size: 11px; color: #333; line-height: 2; white-space: pre; }
-.calc-out .tot { font-weight: bold; color: #000; }
-
-.dtab-row { display: flex; }
-.dtab { font-size: 10px; padding: 3px 10px; border: 1px solid #808080; border-bottom: none; cursor: pointer; background: #d4d0c8; color: #444; }
-.dtab.on { background: #fff; color: #000; font-weight: bold; border-bottom: 1px solid #fff; z-index: 1; margin-bottom: -1px; }
-.dtab:hover:not(.on) { background: #c0bdb5; }
-.diag-panel { border: 1px solid #808080; padding: 12px; background: #fff; min-height: 160px; font-size: 11px; }
-.fn { display: flex; flex-direction: column; }
-.fn-node { padding: 5px 10px; border: 1px solid; max-width: 100%; font-size: 11px; }
-.fn-node.bad  { border-color: #800000; background: #fff8f8; color: #600; }
-.fn-node.good { border-color: #006000; background: #f8fff8; color: #040; }
-.fn-node.neu  { border-color: #808080; background: #f8f8f8; color: #333; }
-.fn-arrow { color: #aaa; padding: 1px 10px; font-size: 12px; }
-.cg { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-@media(max-width:380px) { .cg { grid-template-columns: 1fr; } }
-.ch { font-size: 10px; font-weight: bold; padding: 2px 6px; margin-bottom: 4px; border-bottom: 1px solid; text-transform: uppercase; letter-spacing: 1px; }
-.ch.bad  { color: #800000; border-color: #800000; }
-.ch.good { color: #006000; border-color: #006000; }
-.cr { font-size: 10px; padding: 3px 6px; margin-bottom: 3px; border-left: 2px solid; }
-.cr.bad  { border-color: #800000; background: #fff8f8; color: #600; }
-.cr.good { border-color: #006000; background: #f8fff8; color: #040; }
+  .item-meta {
+    font-size: 13px;
+    color: #999;
+  }
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<!-- HEADER -->
-<div class="panel">
-  <div class="panel-title">
-    <span>Cedric Turner II — Brag Sheet</span>
-    <div class="panel-title-btns">
-      <div class="ptb">_</div><div class="ptb">□</div><div class="ptb">✕</div>
-    </div>
-  </div>
-  <div class="panel-body">
-    <div class="site-name">Cedric Turner II</div>
-    <div class="site-sub">Solutions Architect &nbsp;·&nbsp; dbt Labs &nbsp;·&nbsp; Austin, TX</div>
-    <div class="header-links">
-      <a href="https://cedricturner.github.io/brag-sheet" target="_blank">cedricturner.github.io/brag-sheet</a>
-      <a href="https://www.linkedin.com/in/cedturnerjr/" target="_blank">linkedin/cedturnerjr</a>
-    </div>
-  </div>
-  <div class="statusbar">
-    <span class="sb-cell">Brag Sheet</span>
-    <span class="sb-cell">2026</span>
-    <span>dbt Labs</span>
-  </div>
-</div>
+  <header>
+    <h1>Cedric Turner II</h1>
+    <p>Solutions Architect · dbt Labs · Atlanta, GA</p>
+  </header>
 
-<!-- WHAT I BUILT -->
-<div class="panel">
-  <div class="panel-title">
-    <span>📁 What I Built</span>
-    <div class="panel-title-btns">
-      <div class="ptb">_</div><div class="ptb">□</div><div class="ptb">✕</div>
-    </div>
-  </div>
-  <div class="panel-body">
-
-    <div class="contrib-title">Cost of Doing Nothing — Calculator</div>
-    <div class="contrib-tags">
-      <span class="tag">Revenue lever</span>
-      <span class="tag">Customer-facing</span>
-      <span class="tag">Pre-sales</span>
-    </div>
-    <ul class="plain">
-      <li>Interactive financial model — inputs team size, incident rate, salary</li>
-      <li>Returns annual dollar cost of staying on legacy setup</li>
-      <li>Champions get a number they own, not a vendor claim</li>
+  <section>
+    <div class="section-label">Writing</div>
+    <ul>
+      <li>
+        <a class="item" href="./blog/27/">
+          <div class="item-title">Me at 27</div>
+          <div class="item-meta">April 2026 &nbsp;·&nbsp; How I think, where it comes from</div>
+        </a>
+      </li>
     </ul>
-    <div class="contrib-impact">
-      Became an outbounding tool. Attached a real cost to not upgrading to Enterprise dbt. Gave AEs a concrete anchor where there wasn't one.
-    </div>
-    <div class="btn-row">
-      <button class="win-btn" onclick="openModal('calc-modal')">▶ Preview</button>
-    </div>
+  </section>
 
-    <hr class="div-line">
-
-    <div class="contrib-title">Stored Procs vs dbt — Visual Explainer</div>
-    <div class="contrib-tags">
-      <span class="tag">Team multiplier</span>
-      <span class="tag">Customer-facing</span>
-      <span class="tag">Enablement</span>
-    </div>
-    <ul class="plain">
-      <li>Diagram-first interactive explainer — stored procedures vs dbt side by side</li>
-      <li>Once customers could see the difference, the deal moved</li>
+  <section>
+    <div class="section-label">Work</div>
+    <ul>
+      <li>
+        <a class="item" href="./brag-sheet/">
+          <div class="item-title">Brag Sheet</div>
+          <div class="item-meta">What I've built, who I've helped, numbers that matter</div>
+        </a>
+      </li>
+      <li>
+        <a class="item" href="https://cedricturner.github.io/dbt-artifacts/" target="_blank">
+          <div class="item-title">dbt Artifacts ↗</div>
+          <div class="item-meta">Interactive learning site for dbt concepts</div>
+        </a>
+      </li>
     </ul>
-    <div class="contrib-impact">
-      Other SAs started doing the same. Using Claude to build architecture diagrams for their own deals. The concept spread because I demonstrated it and left behind a system for replicating it.
-    </div>
-    <div class="btn-row">
-      <button class="win-btn" onclick="openModal('diag-modal')">▶ Preview</button>
-    </div>
+  </section>
 
-    <hr class="div-line">
-
-    <div class="contrib-title">PROMPT.md — Artifact Replication System</div>
-    <div class="contrib-tags">
-      <span class="tag">Team standard</span>
-      <span class="tag">Internal tooling</span>
-    </div>
-    <ul class="plain">
-      <li>Skill document — any SA can generate customer-facing HTML explainers</li>
-      <li>Removed the barrier of not knowing where to start</li>
+  <section>
+    <div class="section-label">Elsewhere</div>
+    <ul>
+      <li>
+        <a class="item" href="https://github.com/cedricturner" target="_blank">
+          <div class="item-title">GitHub ↗</div>
+          <div class="item-meta">cedricturner</div>
+        </a>
+      </li>
+      <li>
+        <a class="item" href="https://linkedin.com/in/cedricturner" target="_blank">
+          <div class="item-title">LinkedIn ↗</div>
+          <div class="item-meta">cedricturner</div>
+        </a>
+      </li>
     </ul>
-    <div class="contrib-impact">
-      Became a shared team pattern. SAs now build custom diagrams for their own deals. Quality of technical communication went up without me in the room.
-    </div>
-    <div class="btn-row">
-      <button class="win-btn" onclick="dlPromptMD()">💾 Download .md</button>
-    </div>
+  </section>
 
-    <hr class="div-line">
-
-    <div class="contrib-title">Workshop-Driven "Soft POC" Motion</div>
-    <div class="contrib-tags">
-      <span class="tag">Deal execution</span>
-      <span class="tag">Strategic</span>
-    </div>
-    <ul class="plain">
-      <li>Workshop format replacing formal POC overhead</li>
-      <li>Used across Moneris, Frankenmuth, RadNet, KEEN</li>
-      <li>Eliminated formal POC in several deals</li>
-      <li>Now part of how I ramp AEs</li>
-    </ul>
-
-  </div>
-  <div class="statusbar"><span>4 items</span></div>
 </div>
-
-<!-- TEAM IMPACT -->
-<div class="panel">
-  <div class="panel-title">
-    <span>🤝 Team Impact</span>
-    <div class="panel-title-btns">
-      <div class="ptb">_</div><div class="ptb">□</div><div class="ptb">✕</div>
-    </div>
-  </div>
-  <div class="panel-body">
-
-    <div class="sec">AE Ramp</div>
-    <ul class="plain">
-      <li>Helped ramp Mitch, Tony, and Taylor as new Account Executives</li>
-      <li>Coached on discovery, deal positioning, and execution</li>
-      <li>Directly contributed to AEs closing early deals</li>
-    </ul>
-
-    <hr class="div-line">
-
-    <div class="sec">SA Onboarding</div>
-    <ul class="plain">
-      <li>Helped onboard Shreya, Raphael, Minjae, John D'Amaro, Cici, and others as new Solutions Architects</li>
-      <li>Accelerated technical depth and customer-facing confidence</li>
-      <li>Selected for this based on demonstrated deal execution ability</li>
-    </ul>
-
-    <hr class="div-line">
-
-    <div class="sec">Cross-Regional Reach</div>
-    <ul class="plain">
-      <li>Stretched across West, Central, and East since joining</li>
-      <li>Consistently brought in as an asset on discovery calls beyond my own book</li>
-      <li>Help qualify and disqualify deals across the broader team</li>
-    </ul>
-
-    <hr class="div-line">
-
-    <div class="sec">What I enabled on the team</div>
-
-    <div class="influence-item">
-      <div class="influence-head">Miles Freeborn — Interactive dbt Guide</div>
-      <div class="influence-body">
-        Built a public interactive webpage covering dbt architecture, development workflow, orchestration, and competitive positioning — designed to answer the most common customer questions visually, without slides.
-        <div class="influence-who">Directly inspired by and modeled after Cedric's work &nbsp;·&nbsp; #team-solutions-architects</div>
-      </div>
-    </div>
-
-    <div class="influence-item">
-      <div class="influence-head">Nicole Smith — Competitive Comparison Pages</div>
-      <div class="influence-body">
-        Built interactive side-by-side comparison pages covering dbt Platform vs. dbt Core, vs. Snowflake native tooling, and vs. Databricks / Lakeflow — used live in customer conversations to show concrete differences without leaning on slides.
-        <div class="influence-who">Directly inspired by Cedric's approach &nbsp;·&nbsp; #team-solutions-architects</div>
-      </div>
-    </div>
-
-    <div class="influence-item">
-      <div class="influence-head">Varun Harirajan — New Hire Training Materials</div>
-      <div class="influence-body">
-        Incorporated Cedric's artifact approach into an upcoming training workshop for new hires — extending the pattern into onboarding.
-        <div class="influence-who">#team-solutions-architects</div>
-      </div>
-    </div>
-
-    <div class="influence-item">
-      <div class="influence-head">Reusable dbt 101 Deck</div>
-      <div class="influence-body">
-        Cedric's reusable dbt 101 presentation circulated across the team and was picked up by teammates for use in their own customer conversations.
-        <div class="influence-who">#internal-chime</div>
-      </div>
-    </div>
-
-  </div>
-  <div class="statusbar"><span>4 areas</span></div>
-</div>
-
-<!-- NUMBERS -->
-<div class="panel">
-  <div class="panel-title">
-    <span>📊 Numbers</span>
-    <div class="panel-title-btns">
-      <div class="ptb">_</div><div class="ptb">□</div><div class="ptb">✕</div>
-    </div>
-  </div>
-  <div class="panel-body">
-
-    <div class="sec" style="margin-bottom:10px;">As Solutions Architect &nbsp;·&nbsp; Aug 2025 – present</div>
-    <div class="numbers-row" style="margin-bottom:16px;">
-      <div class="num-cell">
-        <div class="num-val">~$737K</div>
-        <div class="num-label">Delta ARR as Technical Owner</div>
-        <div class="num-sub">Salesforce · Land, Expand, Renew · excl. overages/cancels</div>
-      </div>
-      <div class="num-cell">
-        <div class="num-val">Top Growth SA</div>
-        <div class="num-label">Q4 FY2026 post-sales activity tracking</div>
-      </div>
-      <div class="num-cell">
-        <div class="num-val">$400K</div>
-        <div class="num-label">Early-stage pipeline enabled for two new AEs within their first 45 days</div>
-      </div>
-    </div>
-
-    <div class="sec" style="margin-bottom:10px;">As Customer Solutions Architect &nbsp;·&nbsp; Sep 2024 – Aug 2025</div>
-
-    <div class="note-box" style="margin-bottom:14px;">
-      ARR figures below reflect post-account-migration data available in Salesforce. Actual book managed was 180+ accounts. Highlights represent the largest deals closed during this period.
-    </div>
-
-    <div class="sec" style="margin-bottom:4px;">Biggest wins — confirmed attached as CSA Owner</div>
-    <div class="note-box" style="margin-bottom:8px;">Sourced from Salesforce CSA Owner field (TAM_Owner__c). Deals over $100K where Cedric is listed as CSA Owner, ranked by contract value.</div>
-    <table class="deal-table" style="margin-bottom:16px;">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Account</th>
-          <th>AE</th>
-          <th>Contract Value</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td class="deal-source">1</td><td>Zelis</td><td class="deal-source">Yuhsin</td><td class="deal-amt">$542,679</td></tr>
-        <tr><td class="deal-source">2</td><td>Classic Collision</td><td class="deal-source">Yuhsin</td><td class="deal-amt">$182,952</td></tr>
-        <tr><td class="deal-source">3</td><td>EnergyHub</td><td class="deal-source">Yuhsin</td><td class="deal-amt">$176,925</td></tr>
-        <tr><td class="deal-source">4</td><td>14 West</td><td class="deal-source">Yuhsin</td><td class="deal-amt">$172,598</td></tr>
-        <tr><td class="deal-source">5</td><td>HOLT Group</td><td class="deal-source">Andrew</td><td class="deal-amt">$153,560</td></tr>
-        <tr><td class="deal-source">6</td><td>Homeward Health</td><td class="deal-source">David Aguilera</td><td class="deal-amt">$143,038</td></tr>
-        <tr><td class="deal-source">7</td><td>Virtuous</td><td class="deal-source">David Aguilera</td><td class="deal-amt">$140,640</td></tr>
-        <tr><td class="deal-source">8</td><td>Kalderos</td><td class="deal-source">Yuhsin</td><td class="deal-amt">$132,600</td></tr>
-        <tr><td class="deal-source">9</td><td>Nerdwallet</td><td class="deal-source">Yuhsin</td><td class="deal-amt">$123,751</td></tr>
-        <tr><td class="deal-source">10</td><td>Arkos Health</td><td class="deal-source">Marissa Interdonato</td><td class="deal-amt">$120,000</td></tr>
-        <tr><td class="deal-source">11</td><td>Total Wine and More</td><td class="deal-source">Yuhsin</td><td class="deal-amt">$118,800</td></tr>
-        <tr><td class="deal-source">12</td><td>Upside</td><td class="deal-source">Yuhsin</td><td class="deal-amt">$115,418</td></tr>
-        <tr><td class="deal-source">13</td><td>Bermuda Monetary Authority</td><td class="deal-source">Monica Pedroza</td><td class="deal-amt">$103,000</td></tr>
-        <tr><td class="deal-source">14</td><td>Fortegra</td><td class="deal-source">Yuhsin</td><td class="deal-amt">$100,440</td></tr>
-      </tbody>
-    </table>
-
-    <div class="sec" style="margin-bottom:10px;">AE attainment while paired as CSA &nbsp;·&nbsp; Sep 2024 – Aug 2025</div>
-    <div class="note-box" style="margin-bottom:12px;">
-      Delta ARR sourced from Salesforce. Quota attainment confirmed via #case-when and #mtg-revenue-all-hands. dbt Labs FY quarters: Q3 = Sep–Oct, Q4 = Nov–Jan, Q1 = Feb–Apr, Q2 = May–Jul.
-    </div>
-
-    <div class="ae-section">
-      <div class="ae-header">
-        Yuhsin Yang
-        <span class="ae-total">113.69% New ARR attainment &nbsp;·&nbsp; promoted to Customer Sales Director</span>
-      </div>
-      <table class="qtr-table">
-        <thead>
-          <tr>
-            <th>Quarter</th>
-            <th>Exceeded Quota</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="qtr-label">Q3 FY2025</td>
-            <td><span class="qtr-exceeded yes">✔ Yes</span></td>
-          </tr>
-          <tr>
-            <td class="qtr-label">Q4 FY2025</td>
-            <td><span class="qtr-exceeded yes">✔ Yes</span></td>
-          </tr>
-          <tr>
-            <td class="qtr-label">Q1 FY2026</td>
-            <td><span class="qtr-exceeded yes">✔ Yes</span></td>
-          </tr>
-          <tr>
-            <td class="qtr-label">Q2 FY2026</td>
-            <td><span class="qtr-exceeded yes">✔ Yes — top Growth rep, top 10 SDs globally</span></td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="qtr-note">Exceeded quota every quarter in seat per #case-when (Will Stamatis).</div>
-    </div>
-
-    <hr class="div-line">
-
-    <div class="ae-section">
-      <div class="ae-header">
-        Andrew Harris
-        <span class="ae-total">136.93% New ARR attainment &nbsp;·&nbsp; promoted to Senior Deal Desk Analyst</span>
-      </div>
-      <table class="qtr-table">
-        <thead>
-          <tr>
-            <th>Quarter</th>
-            <th>Exceeded Quota</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="qtr-label">Q3 FY2025</td>
-            <td><span class="qtr-exceeded yes">✔ Yes</span></td>
-          </tr>
-          <tr>
-            <td class="qtr-label">Q4 FY2025</td>
-            <td><span class="qtr-exceeded yes">✔ Yes</span></td>
-          </tr>
-          <tr>
-            <td class="qtr-label">Q2 FY2026</td>
-            <td><span class="qtr-exceeded yes">✔ Yes</span></td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="qtr-note">136.93% New ARR attainment per #mtg-revenue-all-hands (Will Stamatis).</div>
-    </div>
-
-  </div>
-  <div class="statusbar"><span>SA + CSA metrics &nbsp;·&nbsp; Salesforce</span></div>
-</div>
-
-<!-- CAREER -->
-<div class="panel">
-  <div class="panel-title">
-    <span>📋 Career</span>
-    <div class="panel-title-btns">
-      <div class="ptb">_</div><div class="ptb">□</div><div class="ptb">✕</div>
-    </div>
-  </div>
-  <div class="panel-body">
-
-    <div class="sec">Solutions Architect — dbt Labs &nbsp;·&nbsp; Aug 2025–present</div>
-    <ul class="plain"><li>pre-sales → discovery, solution design, demos, POCs</li></ul>
-    <hr class="div-line">
-    <div class="sec">Customer Solutions Architect — dbt Labs &nbsp;·&nbsp; Sep 2024–Aug 2025</div>
-    <ul class="plain"><li>post-sales → adoption, expansion, renewals</li></ul>
-    <hr class="div-line">
-    <div class="sec">Data Engineer — Tesla &nbsp;·&nbsp; Oct 2023–Sep 2024</div>
-    <ul class="plain"><li>texas data center &amp; robotaxi/cyber cab → construction, commissioning, production data</li></ul>
-    <hr class="div-line">
-    <div class="sec">Quality Engineer — CVS Health &nbsp;·&nbsp; Jan 2022–Oct 2023</div>
-    <ul class="plain"><li>healthcare government services → QA automation, IVR &amp; web data</li></ul>
-    <hr class="div-line">
-    <div class="sec">Barista — Foxtrot &nbsp;·&nbsp; Sep 2022–Jun 2023</div>
-    <ul class="plain"><li>#1 coffee-maker in Dallas weekday nights + weekends</li></ul>
-    <hr class="div-line">
-    <div class="sec">Data Engineer — Sumic Care Inc &nbsp;·&nbsp; Jun 2020–Dec 2021</div>
-    <ul class="plain"><li>part-time · Houston, TX · Remote</li></ul>
-
-  </div>
-  <div class="statusbar"><span>6 roles</span></div>
-</div>
-
-<!-- EDUCATION & CERTS -->
-<div class="panel">
-  <div class="panel-title">
-    <span>🎓 Education &amp; Certifications</span>
-    <div class="panel-title-btns">
-      <div class="ptb">_</div><div class="ptb">□</div><div class="ptb">✕</div>
-    </div>
-  </div>
-  <div class="panel-body">
-    <div class="sec">Education</div>
-    <ul class="plain">
-      <li>M.S. Information Systems Management — University of Arizona Global Campus</li>
-      <li>B.S. Computer Information Systems — University of Houston</li>
-    </ul>
-    <hr class="div-line">
-    <div class="sec">Certifications</div>
-    <ul class="plain">
-      <li>dbt Developer Certification</li>
-      <li>Command of the Message — Force Management</li>
-      <li>UiPath RPA Associate</li>
-    </ul>
-  </div>
-  <div class="statusbar"><span>2 degrees &nbsp;·&nbsp; 3 certifications</span></div>
-</div>
-
-<!-- DOWNLOAD -->
-<div class="panel">
-  <div class="panel-title">
-    <span>💾 Download</span>
-    <div class="panel-title-btns">
-      <div class="ptb">_</div><div class="ptb">□</div><div class="ptb">✕</div>
-    </div>
-  </div>
-  <div class="panel-body">
-    <div style="font-size:11px;color:#404040;margin-bottom:8px;">Full brag sheet as markdown</div>
-    <button class="win-btn" onclick="dlFullMD()">💾 Save to Disk...</button>
-  </div>
-</div>
-
-
-<!-- ══ CALCULATOR MODAL ══ -->
-<div class="modal-overlay" id="calc-modal" onclick="closeModalOutside(event,'calc-modal')">
-  <div class="modal-win">
-    <div class="modal-title">
-      <span>🧮 Cost of Doing Nothing — Calculator</span>
-      <div class="panel-title-btns"><div class="ptb" onclick="closeModal('calc-modal')">✕</div></div>
-    </div>
-    <div class="modal-body">
-      <div class="calc-screen-wrap">
-        <div class="calc-screen-label">ANNUAL COST OF INACTION ($USD)</div>
-        <div class="calc-screen-val" id="c-display">$0</div>
-      </div>
-      <div class="s-grid">
-        <div class="s-row">
-          <div class="s-top"><span>engineers on team</span><strong id="v-eng">5</strong></div>
-          <input type="range" min="1" max="30" value="5" id="s-eng" oninput="calcIt()">
-        </div>
-        <div class="s-row">
-          <div class="s-top"><span>hrs/week on manual fixes</span><strong id="v-hrs">8</strong></div>
-          <input type="range" min="1" max="40" value="8" id="s-hrs" oninput="calcIt()">
-        </div>
-        <div class="s-row">
-          <div class="s-top"><span>avg engineer salary</span><strong id="v-sal">$150K</strong></div>
-          <input type="range" min="100000" max="300000" value="150000" step="10000" id="s-sal" oninput="calcIt()">
-        </div>
-        <div class="s-row">
-          <div class="s-top"><span>incidents per month</span><strong id="v-inc">3</strong></div>
-          <input type="range" min="0" max="20" value="3" id="s-inc" oninput="calcIt()">
-        </div>
-        <div class="s-row">
-          <div class="s-top"><span>hrs to resolve each</span><strong id="v-res">4</strong></div>
-          <input type="range" min="1" max="24" value="4" id="s-res" oninput="calcIt()">
-        </div>
-      </div>
-      <div class="calc-out" id="c-out"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="win-btn" onclick="closeModal('calc-modal')">Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══ DIAGRAM MODAL ══ -->
-<div class="modal-overlay" id="diag-modal" onclick="closeModalOutside(event,'diag-modal')">
-  <div class="modal-win">
-    <div class="modal-title">
-      <span>📊 Stored Procs vs dbt</span>
-      <div class="panel-title-btns"><div class="ptb" onclick="closeModal('diag-modal')">✕</div></div>
-    </div>
-    <div class="modal-body">
-      <div class="dtab-row">
-        <div class="dtab on" onclick="switchD('procs',this)">Stored Procs</div>
-        <div class="dtab" onclick="switchD('dbt',this)">dbt</div>
-        <div class="dtab" onclick="switchD('compare',this)">Side by Side</div>
-      </div>
-      <div class="diag-panel" id="diag-body"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="win-btn" onclick="closeModal('diag-modal')">Close</button>
-    </div>
-  </div>
-</div>
-
-
-<script>
-function openModal(id) {
-  document.getElementById(id).classList.add('open');
-  if (id === 'calc-modal') calcIt();
-  if (id === 'diag-modal') initDiag();
-}
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-function closeModalOutside(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
-});
-
-function calcIt() {
-  const eng = +document.getElementById('s-eng').value;
-  const hrs = +document.getElementById('s-hrs').value;
-  const sal = +document.getElementById('s-sal').value;
-  const inc = +document.getElementById('s-inc').value;
-  const res = +document.getElementById('s-res').value;
-  document.getElementById('v-eng').textContent = eng;
-  document.getElementById('v-hrs').textContent = hrs;
-  document.getElementById('v-sal').textContent = '$' + (sal / 1000) + 'K';
-  document.getElementById('v-inc').textContent = inc;
-  document.getElementById('v-res').textContent = res;
-  const rate = sal / 2080;
-  const m = eng * hrs * rate * 52;
-  const i = inc * res * rate * eng * 12;
-  const t = m + i;
-  document.getElementById('c-display').textContent = '$' + Math.round(t).toLocaleString();
-  document.getElementById('c-out').innerHTML =
-    `manual work    $${Math.round(m).toLocaleString()} / yr\n` +
-    `incidents      $${Math.round(i).toLocaleString()} / yr\n` +
-    `<span class="tot">total          $${Math.round(t).toLocaleString()} / yr</span>`;
-}
-
-const dContent = {
-  procs: `<div style="font-size:10px;color:#800000;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Stored Procedure Architecture</div>
-    <div class="fn">
-      <div class="fn-node neu">raw source data</div><div class="fn-arrow">|</div>
-      <div class="fn-node bad">EXEC sp_clean_orders — manual SQL, no version control</div><div class="fn-arrow">|</div>
-      <div class="fn-node bad">EXEC sp_join_customers — depends on above (undocumented)</div><div class="fn-arrow">|</div>
-      <div class="fn-node bad">EXEC sp_revenue_calc — hardcoded logic, no tests</div><div class="fn-arrow">|</div>
-      <div class="fn-node neu">report / dashboard</div>
-    </div>
-    <div style="margin-top:10px;font-size:10px;color:#800000;border-left:2px solid #800000;padding-left:8px;line-height:1.9;">no lineage · no tests · breaks silently · one person holds all context</div>`,
-  dbt: `<div style="font-size:10px;color:#006000;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">dbt Architecture</div>
-    <div class="fn">
-      <div class="fn-node neu">source(raw, orders) — schema tests run here</div><div class="fn-arrow">|</div>
-      <div class="fn-node good">stg_orders.sql — SELECT + cleaning, documented</div><div class="fn-arrow">|</div>
-      <div class="fn-node good">int_orders_customers.sql — &#123;&#123; ref('stg_orders') &#125;&#125;</div><div class="fn-arrow">|</div>
-      <div class="fn-node good">fct_revenue.sql — tested, documented, PR-reviewed</div><div class="fn-arrow">|</div>
-      <div class="fn-node neu">report / dashboard — quality guaranteed upstream</div>
-    </div>
-    <div style="margin-top:10px;font-size:10px;color:#006000;border-left:2px solid #006000;padding-left:8px;line-height:1.9;">auto lineage · tests at every layer · git history · anyone can onboard</div>`,
-  compare: `<div class="cg">
-    <div>
-      <div class="ch bad">Stored Procedures</div>
-      <div class="cr bad">Logic buried in database</div>
-      <div class="cr bad">No version control</div>
-      <div class="cr bad">Hidden dependencies</div>
-      <div class="cr bad">No tests</div>
-      <div class="cr bad">One person knows it all</div>
-      <div class="cr bad">Debugging = archaeology</div>
-    </div>
-    <div>
-      <div class="ch good">dbt</div>
-      <div class="cr good">SQL files in Git</div>
-      <div class="cr good">Full version history</div>
-      <div class="cr good">Explicit &#123;&#123; ref() &#125;&#125;</div>
-      <div class="cr good">Built-in tests</div>
-      <div class="cr good">Anyone can contribute</div>
-      <div class="cr good">Debugging = reading docs</div>
-    </div>
-  </div>`
-};
-let dInit = false;
-function initDiag() {
-  if (!dInit) { switchD('procs', document.querySelector('.dtab')); dInit = true; }
-}
-function switchD(v, el) {
-  document.getElementById('diag-body').innerHTML = dContent[v];
-  document.querySelectorAll('.dtab').forEach(t => t.classList.remove('on'));
-  if (el) el.classList.add('on');
-}
-
-function dl(content, filename) {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([content], {type:'text/markdown'}));
-  a.download = filename;
-  a.click();
-}
-
-const promptMD = `# PROMPT.md — Artifact Replication System
-
-A skill document giving any SA a repeatable way to generate polished,
-customer-facing HTML explainers without needing to build from scratch.
-Became a shared team pattern.
-
----
-Internal · dbt Labs SA team · 2024
-`;
-
-const fullMD = `# Cedric Turner II — Brag Sheet
-Solutions Architect · dbt Labs · Austin, TX · 2026
-
----
-
-## What I Built
-
-### Cost of Doing Nothing — Calculator
-- Interactive financial model → annual cost of inaction
-- Became an outbounding tool for Enterprise upgrade conversations
-
-### Stored Procs vs dbt — Visual Explainer
-- Diagram-first interactive explainer
-- Spread to the team — SAs now build their own architecture diagrams
-
-### PROMPT.md — Artifact Replication System
-- Skill document for repeatable customer-facing HTML explainers
-- Became a shared team pattern
-
-### Workshop-Driven Soft POC Motion
-- Used: Moneris, Frankenmuth, RadNet, KEEN
-- Eliminated formal POC in several deals
-
----
-
-## Team Impact
-
-AE Ramp: Mitch, Tony, Taylor
-SA Onboarding: Shreya, Raphael, Minjae, John D'Amaro, Cici, and others
-Cross-Regional: West, Central, East — brought in on discovery beyond own book
-
-Enabled:
-- Miles Freeborn → Interactive dbt Guide
-- Nicole Smith → Competitive comparison pages
-- Varun Harirajan → New hire training materials
-- Reusable dbt 101 deck circulated team-wide
-
----
-
-## Numbers
-
-### As Solutions Architect (Aug 2025 – present)
-~$737K Delta ARR as Technical Owner (Salesforce)
-Top Growth SA — Q4 FY2026
-$400K pipeline for two AEs within 45 days
-
-### As Customer Solutions Architect (Sep 2024 – Aug 2025)
-Note: ARR reflects post-account-migration Salesforce data. Book was 180+ accounts.
-
-Biggest deals:
-- Zelis $542,679 · +$28,198 Delta ARR (d4k)
-- Classic Collision $182,952 · +$5,984 Delta ARR (d4k)
-- Fullscript $150,000 · +$34,180 Delta ARR
-- Gorgias $124,000 · +$4,400 Delta ARR
-- Mitratech $119,520 · +$6,800 Delta ARR
-- Sweetwater $115,000 · +$21,500 Delta ARR
-- Bullhorn $113,400 · +$1,800 Delta ARR
-- Taptap Send $106,200 · +$17,100 Delta ARR
-- Blend $91,760 · +$6,280 Delta ARR
-- Tiger Global $85,050 · +$32,550 Delta ARR
-- La-Z-Boy $61,200 · +$11,700 Delta ARR (d4k)
-- PrizePicks $55,800 · +$24,360 Delta ARR
-
-### AE Attainment While Paired as CSA
-
-Yuhsin Yang ($5.6M total contract value, ~$624K Delta ARR)
-Q3 FY25 (Sep–Oct 2024)    ~$67K
-Q4 FY25 (Nov 2024–Jan 2025) ~$66K
-Q1 FY26 (Feb–Apr 2025)    ~$113K
-Q2 FY26 (May–Jul 2025)    ~$378K  ← Zelis $542K close
-
-Andrew Harris (~$747K Delta ARR)
-Q3 FY25 (Sep–Oct 2024)    ~$128K
-Q4 FY25 (Nov 2024–Jan 2025) ~$179K  ← Amplify $520K close
-Q1 FY26 (Feb–Apr 2025)    ~$67K
-Q2 FY26 (May–Jul 2025)    ~$373K  ← Zayo $455K, EMC $342K, Clio $125K
-
----
-
-## Career
-
-Solutions Architect — dbt Labs (Aug 2025–present)
-Customer Solutions Architect — dbt Labs (Sep 2024–Aug 2025)
-Data Engineer — Tesla (Oct 2023–Sep 2024)
-Quality Engineer — CVS Health (Jan 2022–Oct 2023)
-Barista — Foxtrot (Sep 2022–Jun 2023) · #1 coffee-maker in Dallas weekday nights + weekends
-Data Engineer — Sumic Care Inc (Jun 2020–Dec 2021)
-
----
-
-## Education
-M.S. Information Systems Management — University of Arizona Global Campus
-B.S. Computer Information Systems — University of Houston
-
-## Certifications
-dbt Developer Certification · Command of the Message · UiPath RPA Associate
-`;
-
-function dlPromptMD() { dl(promptMD, 'prompt-md.md'); }
-function dlFullMD()   { dl(fullMD,   'cedric-turner-brag-sheet.md'); }
-</script>
 </body>
 </html>
