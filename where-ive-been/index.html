@@ -514,13 +514,13 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const galleries = {
-  hakone:     [['japan-photo.jpg','Hakone · Lake Ashi']],
-  tokyo:      [['photos/japan-IMG_6800.jpg','Tokyo']],
+  hakone:     [['japan-photo.jpg','Hakone · Lake Ashi'],['photos/japan-IMG_6847.jpg','Hakone · Lake',-90]],
+  tokyo:      [['photos/japan-IMG_6800.jpg','Tokyo'],['photos/japan-IMG_0408.jpg','Tokyo',-90],['photos/japan-IMG_0468.jpg','Tokyo',-90]],
   kyoto:      [['photos/japan-IMG_0647.jpg','Kyoto'],['photos/japan-IMG_6888.jpg','Kyoto']],
   osaka:      [['photos/japan-IMG_6976.jpg','Osaka',-90],['photos/japan-IMG_6977.jpg','Osaka',-90]],
   himeji:     [['photos/japan-IMG_6945.jpg','Himeji Castle']],
   hiroshima:  [['photos/japan-IMG_0832.jpg','Miyajima · Hiroshima',-90]],
-  seoul:      [['photos/seoul-IMG_7723.jpg','Seoul']],
+  seoul:      [['photos/seoul-IMG_7658.jpg','Seoul',-90],['photos/seoul-IMG_7723.jpg','Seoul'],['photos/seoul-IMG_7727.jpg','Seoul · Subway',-90]],
   strasbourg: [['photos/france-1.jpg','Strasbourg · Cathédrale Notre-Dame',-90]],
 };
 
@@ -605,6 +605,7 @@ document.addEventListener('keydown', function(e) {
     { name: 'Kyoto',             lat: 35.0116,  lng: 135.7681 },
     { name: 'Osaka',             lat: 34.6937,  lng: 135.5023, fav: true },
     { name: 'Hakone',            lat: 35.2323,  lng: 139.0236 },
+    { name: 'Himeji',             lat: 34.8394,  lng: 134.6939 },
     { name: 'Hiroshima',         lat: 34.3853,  lng: 132.4553 },
     // Korea
     { name: 'Seoul',             lat: 37.5665,  lng: 126.9780, fav: true },
