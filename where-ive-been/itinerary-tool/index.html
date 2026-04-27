@@ -1072,15 +1072,15 @@ a { color: inherit; text-decoration: none; }
           <span class="airport-date" id="headerArrDate">05/30</span>
         </div>
         <div class="airport-hero-codes">
-          <span class="airport-hero-code" id="headerFrom">AUS</span>
+          <span class="airport-hero-code" id="headerFrom">???</span>
           <span class="airport-hero-swap">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </span>
-          <span class="airport-hero-code" id="headerTo">HND</span>
+          <span class="airport-hero-code" id="headerTo">???</span>
         </div>
         <div class="airport-city-row">
-          <span class="airport-city" id="headerFromCity">Austin</span>
-          <span class="airport-city" id="headerToCity">Tokyo</span>
+          <span class="airport-city" id="headerFromCity"></span>
+          <span class="airport-city" id="headerToCity"></span>
         </div>
       </div>
       <div class="header-actions">
@@ -2335,10 +2335,10 @@ function calcDayCost(day) {
 // TRIP CONFIG (header airport/date editing)
 // =============================================
 const TRIP_CONFIG_DEFAULTS = {
-  fromCode: 'AUS',
-  fromCity: 'Austin',
-  toCode: 'HND',
-  toCity: 'Tokyo',
+  fromCode: '',
+  fromCity: '',
+  toCode: '',
+  toCity: '',
   depDate: '2026-05-19',
   retDate: '2026-05-30'
 };
@@ -2406,10 +2406,10 @@ function saveTripConfig() {
   const name = document.getElementById('cfgTripName').value.trim();
   if (name) itinerary.tripName = name;
   tripConfig = {
-    fromCode: (document.getElementById('cfgFromCode').value.trim() || 'AUS').toUpperCase(),
-    fromCity: document.getElementById('cfgFromCity').value.trim() || 'Austin',
-    toCode: (document.getElementById('cfgToCode').value.trim() || 'HND').toUpperCase(),
-    toCity: document.getElementById('cfgToCity').value.trim() || 'Tokyo',
+    fromCode: (document.getElementById('cfgFromCode').value.trim()).toUpperCase(),
+    fromCity: document.getElementById('cfgFromCity').value.trim(),
+    toCode: (document.getElementById('cfgToCode').value.trim()).toUpperCase(),
+    toCity: document.getElementById('cfgToCity').value.trim(),
     depDate: document.getElementById('cfgDepDate').value || '2026-05-19',
     retDate: document.getElementById('cfgRetDate').value || '2026-05-30'
   };
