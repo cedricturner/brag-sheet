@@ -320,6 +320,14 @@
     font-size: 9px;
   }
 
+  .photo-note {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 11px;
+    color: #bbb;
+    white-space: nowrap;
+    align-self: center;
+  }
+
   /* Map legend */
   .map-legend {
     display: flex;
@@ -457,7 +465,7 @@
         <button class="photo-tag" onclick="openGallery('amsterdam',0)">Amsterdam</button>
         <button class="photo-tag" onclick="openGallery('paris',0)">Paris</button>
         <button class="photo-tag" onclick="openGallery('london',0)">London</button>
-        <button class="photo-tag" onclick="openGallery('zurich',0)">Zurich</button>
+        <button class="photo-tag" onclick="openGallery('zurich',0)">Zurich</button><span class="photo-note">way too expensive</span>
         <button class="photo-tag" onclick="openGallery('strasbourg',0)">Strasbourg</button>
       </div>
     </div>
@@ -526,13 +534,13 @@
 const galleries = {
   hakone:     [['japan-photo.jpg','Hakone · Lake Ashi'],['photos/japan-IMG_6847.jpg','Hakone · Lake']],
   tokyo:      [['photos/japan-IMG_6800.jpg','Tokyo'],['photos/japan-IMG_0408.jpg','Tokyo'],['photos/japan-IMG_0468.jpg','Tokyo']],
-  kyoto:      [['photos/japan-IMG_0647.jpg','Kyoto'],['photos/japan-IMG_0608-2.jpg','Kyoto'],['photos/japan-IMG_6888.jpg','Kyoto']],
+  kyoto:      [['photos/japan-IMG_0647.jpg','Kyoto'],['photos/japan-IMG_6888.jpg','Kyoto']],
   osaka:      [['photos/japan-IMG_6976.jpg','Osaka'],['photos/japan-IMG_6977.jpg','Osaka']],
   himeji:     [['photos/japan-IMG_6945.jpg','Himeji Castle']],
   hiroshima:  [['photos/japan-IMG_0832.jpg','Miyajima · Hiroshima']],
   seoul:      [['photos/seoul-IMG_7658.jpg','Seoul'],['photos/seoul-IMG_7723.jpg','Seoul'],['photos/seoul-IMG_7727.jpg','Seoul · Subway']],
-  strasbourg: [['photos/france-1.jpg','Strasbourg · Cathédrale Notre-Dame',-90]],
-  paris:      [['photos/france-3.jpg','Paris'],['photos/france-4.jpg','Paris']],
+  strasbourg: [['photos/france-1.jpg','Strasbourg · Notre-Dame Cathedral']],
+  paris:      [['photos/france-3.jpg','Paris'],['photos/france-4.jpg','Paris · Eiffel Tower']],
   amsterdam:  [['photos/amsterdam-IMG_7059.jpg','Amsterdam'],['photos/amsterdam-IMG_7068.jpg','Amsterdam'],['photos/amsterdam-IMG_7072.jpg','Amsterdam'],['photos/amsterdam-IMG_9679.jpg','Amsterdam']],
   london:     [['photos/london-IMG_9812.jpg','London'],['photos/london-IMG_9822.jpg','London'],['photos/london-IMG_9838.jpg','London']],
   zurich:     [['photos/zurich-IMG_7033.jpg','Zurich'],['photos/zurich-IMG_7034.jpg','Zurich']],
