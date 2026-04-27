@@ -1,0 +1,2300 @@
+<!-- DRAFT: local only, not deployed yet -->
+<!--
+  Japan 2026 Travel Itinerary
+  ============================
+  Cedric Turner & Mickey · May 19–30, 2026 · AUS → HND
+
+  Usage:
+  - Open index.html in any modern browser (no server needed)
+  - All data auto-saves to localStorage key: japan-2026-itinerary
+  - Click any activity card to edit it
+  - Drag cards to reorder within a day
+  - Green FAB (bottom-right) opens the day's Google Maps route
+  - Use Import panel to paste text/JSON itinerary data
+  - Use Export panel to download JSON/Markdown or enter presentation mode
+  - "Reset to default" restores the original seed data (with confirmation)
+
+  To edit seed data: find the SEED_DATA constant near the top of the <script> block
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Japan 2026 · Cedric & Mickey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Space+Mono:wght@400;700&family=Permanent+Marker&family=Oswald:wght@400;600&family=Abril+Fatface&family=Bebas+Neue&family=Caveat:wght@400;700&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+/* =============================================
+   CSS VARIABLES & RESET
+   ============================================= */
+:root {
+  --bg: #fafaf9;
+  --card: #ffffff;
+  --purple: #9d8fe0;
+  --purple-light: #f0effa;
+  --purple-dark: #7b6bbf;
+  --green: #7ade2c;
+  --green-dark: #62c41e;
+  --text: #1c1c1c;
+  --muted: #888;
+  --faint: #bbb;
+  --border: #e8e5e0;
+  --rule: #e8e5e0;
+  --shadow: none;
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+  --radius: 8px;
+  --radius-sm: 4px;
+  --radius-pill: 100px;
+  font-size: 16px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  font-size: 15px;
+}
+
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input, textarea, select { font-family: inherit; }
+a { color: inherit; text-decoration: none; }
+
+/* =============================================
+   LAYOUT
+   ============================================= */
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 0 100px;
+  min-height: 100vh;
+}
+
+/* =============================================
+   HEADER
+   ============================================= */
+.trip-header {
+  background: var(--bg);
+  padding: 14px 20px 0;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0;
+}
+
+/* New hero airport block */
+.airport-hero {
+  flex: 1;
+  cursor: pointer;
+  user-select: none;
+  padding-bottom: 10px;
+}
+
+.airport-date-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.airport-date {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.airport-hero-codes {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  transition: opacity 0.15s;
+  position: relative;
+}
+
+.airport-hero-code {
+  font-size: 52px;
+  font-weight: 900;
+  letter-spacing: -2px;
+  color: var(--text);
+  line-height: 1;
+  will-change: transform, opacity;
+  transition: none;
+}
+
+.airport-hero-swap {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--purple);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.airport-hero-swap svg {
+  width: 18px;
+  height: 18px;
+}
+
+.airport-city-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1px;
+}
+
+.airport-city {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding-top: 2px;
+}
+
+.header-icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.header-icon-btn:hover { background: var(--purple-light); color: var(--purple); }
+.header-icon-btn svg { width: 16px; height: 16px; }
+
+/* Day Tabs */
+.day-tabs-wrapper {
+  margin: 12px -20px 0;
+  padding: 0 20px 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  display: flex;
+  gap: 8px;
+}
+
+.day-tabs-wrapper::-webkit-scrollbar { display: none; }
+
+.day-tab {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  background: transparent;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.day-tab:hover { border-color: var(--text); color: var(--text); }
+
+.day-tab.active {
+  background: var(--text);
+  border-color: var(--text);
+  color: white;
+}
+
+/* =============================================
+   COLLAPSIBLE PANELS (Import / Export)
+   ============================================= */
+.panel {
+  margin: 12px 16px 0;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+
+.panel-header:hover { background: var(--bg); }
+
+.panel-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.panel-header-left svg { width: 15px; height: 15px; color: var(--purple); }
+
+.panel-chevron {
+  color: var(--muted);
+  transition: transform 0.2s;
+  width: 16px;
+  height: 16px;
+}
+
+.panel-chevron.open { transform: rotate(180deg); }
+
+.panel-body {
+  display: none;
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.panel-body.open { display: block; }
+
+.panel-body textarea {
+  width: 100%;
+  min-height: 100px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 13px;
+  resize: vertical;
+  outline: none;
+  margin-top: 12px;
+  color: var(--text);
+  background: var(--bg);
+  transition: border-color 0.15s;
+}
+
+.panel-body textarea:focus { border-color: var(--purple); }
+
+.panel-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.btn {
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.btn svg { width: 14px; height: 14px; }
+
+.btn-primary {
+  background: var(--purple);
+  color: white;
+}
+
+.btn-primary:hover { background: var(--purple-dark); }
+
+.btn-secondary {
+  background: var(--bg);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+}
+
+.btn-secondary:hover { border-color: var(--purple); color: var(--purple); }
+
+.btn-green {
+  background: var(--green);
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.btn-green:hover { background: var(--green-dark); }
+
+.btn-danger {
+  background: #fff0f0;
+  color: #d44;
+  border: 1.5px solid #fdd;
+}
+
+.btn-danger:hover { background: #fdd; }
+
+.import-preview {
+  margin-top: 10px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 12.5px;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+  display: none;
+}
+
+.file-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.file-input-wrapper input[type="file"] { display: none; }
+
+/* =============================================
+   DAY SECTION
+   ============================================= */
+.day-section { display: none; padding: 0 16px; }
+.day-section.active { display: block; }
+
+.day-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0 10px;
+}
+
+.day-section-title {
+  font-family: 'Courier Prime', Courier, monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.day-section-subtitle {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-top: 3px;
+}
+
+.day-route-btn {
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.day-route-btn:hover { border-color: var(--text); color: var(--text); }
+.day-route-btn svg { width: 12px; height: 12px; }
+
+/* =============================================
+   ACTIVITY CARDS
+   ============================================= */
+.activities-list { display: flex; flex-direction: column; gap: 10px; }
+
+.activity-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: none;
+  overflow: hidden;
+  transition: border-color 0.15s, transform 0.15s;
+  cursor: pointer;
+  position: relative;
+}
+
+.activity-card:hover { border-color: #c8c4be; }
+.activity-card.dragging { opacity: 0.5; transform: scale(0.98); }
+.activity-card.drag-over { border-color: var(--text); }
+
+.card-main {
+  display: flex;
+  align-items: flex-start;
+  padding: 14px 14px 12px;
+  gap: 12px;
+}
+
+.card-content { flex: 1; min-width: 0; }
+
+.card-stop-time {
+  font-size: 11.5px;
+  color: var(--muted);
+  font-weight: 500;
+  margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.card-location-name {
+  font-family: 'Courier Prime', Courier, monospace;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: 3px;
+}
+
+.card-neighborhood {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.card-badges {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Base badge reset — individual category badges override everything */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+/* food 🍜 — Permanent Marker, warm yellow */
+.badge-food {
+  font-family: 'Permanent Marker', cursive;
+  background: #fde68a;
+  color: #78350f;
+  transform: rotate(-1.5deg);
+  font-size: 11px;
+}
+
+/* anime 🎌 — Space Mono bold, salmon pink */
+.badge-anime {
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  background: #fca5a5;
+  color: #7f1d1d;
+  transform: rotate(1deg);
+  font-size: 10.5px;
+}
+
+/* shopping 🛍 — Oswald, teal */
+.badge-shopping {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+  background: #99f6e4;
+  color: #134e4a;
+  transform: rotate(-1deg);
+  font-size: 12px;
+  letter-spacing: 0.03em;
+}
+
+/* culture 🏛 — Abril Fatface, blue */
+.badge-culture {
+  font-family: 'Abril Fatface', serif;
+  background: #bfdbfe;
+  color: #1e3a5f;
+  transform: rotate(0.5deg);
+  font-size: 11px;
+}
+
+/* nightlife 🌙 — Bebas Neue, dark with white text */
+.badge-nightlife {
+  font-family: 'Bebas Neue', sans-serif;
+  background: #1e293b;
+  color: #fff;
+  transform: rotate(-1deg);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+}
+
+/* travel ✈ — Caveat, orange */
+.badge-travel {
+  font-family: 'Caveat', cursive;
+  font-weight: 700;
+  background: #fed7aa;
+  color: #7c2d12;
+  transform: rotate(1.5deg);
+  font-size: 13px;
+}
+
+/* rest 🛌 — Special Elite, lavender */
+.badge-rest {
+  font-family: 'Special Elite', serif;
+  background: #e9d5ff;
+  color: #3b0764;
+  transform: rotate(-0.5deg);
+  font-size: 11px;
+}
+
+/* Price badge — clean Space Mono, no background */
+.badge-cost {
+  font-family: 'Space Mono', monospace;
+  background: none;
+  color: #888;
+  font-size: 11px;
+  font-weight: 400;
+  padding: 2px 4px;
+  transform: none;
+  border-radius: 0;
+}
+
+.badge-reservation {
+  background: #fff8e6;
+  color: #b08000;
+  font-size: 11px;
+  transform: none;
+  border-radius: var(--radius-pill);
+}
+
+.card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.heart-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ccc;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  border-radius: 50%;
+  transition: color 0.15s, transform 0.1s;
+  flex-shrink: 0;
+}
+
+.heart-btn:hover { color: #e85d75; transform: scale(1.15); }
+.heart-btn.favorited { color: #e85d75; }
+.heart-btn svg { width: 16px; height: 16px; }
+
+.map-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--faint);
+  transition: all 0.15s;
+}
+
+.map-btn:hover { background: var(--bg); color: var(--text); }
+.map-btn svg { width: 15px; height: 15px; }
+
+.drag-handle {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ccc;
+  cursor: grab;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.drag-handle:active { cursor: grabbing; }
+.drag-handle svg { width: 14px; height: 14px; }
+
+/* Card notes (expand/collapse) */
+.card-notes-toggle {
+  padding: 0 14px 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--purple);
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+}
+
+.card-notes-toggle:hover { color: var(--purple-dark); }
+.card-notes-toggle svg { width: 12px; height: 12px; transition: transform 0.2s; }
+.card-notes-toggle.open svg { transform: rotate(180deg); }
+
+.card-notes {
+  display: none;
+  padding: 0 14px 12px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+  border-top: 1px solid var(--border);
+  margin: 0 14px;
+  padding-top: 10px;
+}
+
+.card-notes.open { display: block; }
+
+/* =============================================
+   DAY SUMMARY BAR
+   ============================================= */
+.day-summary {
+  margin-top: 14px;
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  gap: 0;
+}
+
+.summary-item {
+  flex: 1;
+  text-align: center;
+  border-right: 1px solid var(--border);
+}
+
+.summary-item:last-child { border-right: none; }
+
+.summary-value {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.summary-label {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+/* =============================================
+   ADD ACTIVITY / ADD DAY
+   ============================================= */
+.add-activity-btn {
+  margin-top: 12px;
+  width: 100%;
+  padding: 13px;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s;
+  background: transparent;
+}
+
+.add-activity-btn:hover {
+  background: var(--purple-light);
+  border-color: var(--purple);
+}
+
+.add-activity-btn svg { width: 16px; height: 16px; }
+
+.add-day-section {
+  padding: 12px 16px;
+}
+
+.add-day-btn {
+  width: 100%;
+  padding: 13px;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s;
+  background: transparent;
+}
+
+.add-day-btn:hover { background: var(--bg); border-color: var(--muted); color: var(--text); }
+
+/* =============================================
+   GREEN FAB
+   ============================================= */
+.fab {
+  position: fixed;
+  bottom: 24px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #1a1a1a;
+  box-shadow: 0 4px 18px rgba(122,222,44,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  transition: all 0.2s;
+}
+
+.fab:hover {
+  transform: scale(1.08);
+  background: var(--green-dark);
+  box-shadow: 0 6px 24px rgba(122,222,44,0.55);
+}
+
+.fab:active { transform: scale(0.95); }
+.fab svg { width: 24px; height: 24px; }
+
+/* =============================================
+   MODAL
+   ============================================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 300;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal {
+  background: var(--card);
+  border-radius: var(--radius) var(--radius) 0 0;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  padding: 0 20px 32px;
+}
+
+.modal-overlay.open .modal { transform: translateY(0); }
+
+.modal-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 12px auto 16px;
+}
+
+.modal-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  margin-bottom: 18px;
+}
+
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.form-input:focus { border-color: var(--purple); }
+
+.form-textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.form-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg);
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.checkbox-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.checkbox-label input { cursor: pointer; accent-color: var(--purple); }
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-actions .btn { flex: 1; justify-content: center; padding: 12px; font-size: 14px; }
+
+/* Category checkbox grid */
+.category-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.category-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.15s;
+}
+
+.category-check input { display: none; }
+.category-check.checked { border-color: var(--purple); background: var(--purple-light); color: var(--purple-dark); }
+
+/* =============================================
+   PRINT / PRESENTATION MODE
+   ============================================= */
+.presentation-mode .header-actions,
+.presentation-mode .day-route-btn,
+.presentation-mode .add-activity-btn,
+.presentation-mode .add-day-section,
+.presentation-mode .panel,
+.presentation-mode .card-main .drag-handle,
+.presentation-mode .fab { display: none !important; }
+
+.presentation-mode .activity-card { cursor: default; }
+
+@media print {
+  .header-actions, .day-route-btn, .add-activity-btn,
+  .add-day-section, .panel, .drag-handle, .fab,
+  .day-tabs-wrapper { display: none !important; }
+  .day-section { display: block !important; page-break-after: always; }
+  body { background: white; }
+  .activity-card { box-shadow: none; border: 1px solid #eee; }
+  .trip-header { position: static; box-shadow: none; }
+}
+
+/* =============================================
+   MISC UTILITY
+   ============================================= */
+.text-purple { color: var(--purple); }
+.mt-8 { margin-top: 8px; }
+.flex { display: flex; }
+.gap-8 { gap: 8px; }
+.items-center { align-items: center; }
+
+.toast {
+  position: fixed;
+  bottom: 96px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--text);
+  color: white;
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0;
+  transition: all 0.3s;
+  z-index: 400;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* =============================================
+   TRIP CONFIG MODAL
+   ============================================= */
+.config-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 500;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.config-modal-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.config-modal {
+  background: var(--card);
+  border-radius: var(--radius) var(--radius) 0 0;
+  width: 100%;
+  max-width: 480px;
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  padding: 0 20px 36px;
+}
+
+.config-modal-overlay.open .config-modal { transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <!-- TRIP HEADER -->
+  <header class="trip-header" id="tripHeader">
+    <div class="header-top">
+      <!-- Airport hero — click to edit -->
+      <div class="airport-hero" onclick="openTripConfig()" title="Edit trip details">
+        <div class="airport-date-row">
+          <span class="airport-date" id="headerDepDate">05/19</span>
+          <span class="airport-date" id="headerArrDate">05/30</span>
+        </div>
+        <div class="airport-hero-codes">
+          <span class="airport-hero-code" id="headerFrom">AUS</span>
+          <span class="airport-hero-swap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </span>
+          <span class="airport-hero-code" id="headerTo">HND</span>
+        </div>
+        <div class="airport-city-row">
+          <span class="airport-city" id="headerFromCity">Austin</span>
+          <span class="airport-city" id="headerToCity">Tokyo</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="header-icon-btn" onclick="togglePresentation()" title="Presentation mode">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        </button>
+        <button class="header-icon-btn" onclick="window.print()" title="Print">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        </button>
+        <button class="header-icon-btn" onclick="confirmReset()" title="Reset to default">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="day-tabs-wrapper" id="dayTabs"></div>
+  </header>
+
+  <!-- IMPORT PANEL -->
+  <div class="panel" id="importPanel">
+    <div class="panel-header" onclick="togglePanel('import')">
+      <div class="panel-header-left">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+        Import
+      </div>
+      <svg class="panel-chevron" id="importChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="panel-body" id="importBody">
+      <textarea id="importText" placeholder="Paste text, markdown, or JSON itinerary here…"></textarea>
+      <div class="import-preview" id="importPreview"></div>
+      <div class="panel-actions">
+        <button class="btn btn-secondary" onclick="parseImport()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Parse
+        </button>
+        <button class="btn btn-primary" onclick="doImport()" id="importBtn" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/></svg>
+          Import
+        </button>
+      </div>
+      <div class="file-input-wrapper mt-8">
+        <label class="btn btn-secondary" for="jsonFile">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Load JSON file
+        </label>
+        <input type="file" id="jsonFile" accept=".json" onchange="loadJsonFile(event)">
+        <span id="fileStatus" style="font-size:12px;color:var(--muted)"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPORT PANEL -->
+  <div class="panel" id="exportPanel">
+    <div class="panel-header" onclick="togglePanel('export')">
+      <div class="panel-header-left">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+        Export & Share
+      </div>
+      <svg class="panel-chevron" id="exportChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="panel-body" id="exportBody">
+      <div class="panel-actions" style="margin-top:12px">
+        <button class="btn btn-secondary" onclick="exportJSON()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Export JSON
+        </button>
+        <button class="btn btn-secondary" onclick="exportMarkdown()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Export Markdown
+        </button>
+        <button class="btn btn-green" onclick="togglePresentation()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Presentation Mode
+        </button>
+        <button class="btn btn-secondary" onclick="window.print()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY SECTIONS (rendered by JS) -->
+  <div id="daySections"></div>
+
+  <!-- ADD DAY -->
+  <div class="add-day-section">
+    <button class="add-day-btn" onclick="addDay()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      Add Day
+    </button>
+  </div>
+
+</div><!-- /.app -->
+
+<!-- TRIP CONFIG MODAL -->
+<div class="config-modal-overlay" id="configModalOverlay" onclick="closeConfigModalOnBackdrop(event)">
+  <div class="config-modal" id="configModal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Edit Trip</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">From Airport</label>
+        <input type="text" class="form-input" id="cfgFromCode" placeholder="AUS" maxlength="4" style="text-transform:uppercase;font-weight:700;font-size:18px;">
+      </div>
+      <div class="form-group">
+        <label class="form-label">To Airport</label>
+        <input type="text" class="form-input" id="cfgToCode" placeholder="HND" maxlength="4" style="text-transform:uppercase;font-weight:700;font-size:18px;">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">From City</label>
+        <input type="text" class="form-input" id="cfgFromCity" placeholder="Austin">
+      </div>
+      <div class="form-group">
+        <label class="form-label">To City</label>
+        <input type="text" class="form-input" id="cfgToCity" placeholder="Tokyo">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Departure Date</label>
+        <input type="date" class="form-input" id="cfgDepDate">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Return Date</label>
+        <input type="date" class="form-input" id="cfgRetDate">
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeTripConfig()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTripConfig()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Save
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- GREEN FAB -->
+<button class="fab" id="fabBtn" onclick="openDayRoute()" title="Navigate today's route">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+</button>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ACTIVITY EDIT MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOnBackdrop(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modalTitle">Edit Activity</div>
+
+    <div class="form-group">
+      <label class="form-label">Location Name *</label>
+      <input type="text" class="form-input" id="fieldName" placeholder="e.g. Senso-ji Temple">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Time</label>
+        <input type="time" class="form-input" id="fieldTime">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cost</label>
+        <input type="text" class="form-input" id="fieldCost" placeholder="e.g. ¥2,000">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Neighborhood / City</label>
+      <input type="text" class="form-input" id="fieldNeighborhood" placeholder="e.g. Asakusa, Tokyo">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Map Address / Search Query</label>
+      <input type="text" class="form-input" id="fieldAddress" placeholder="e.g. Senso-ji Temple, Asakusa, Tokyo">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Categories</label>
+      <div class="category-grid" id="categoryGrid">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Priority</label>
+      <select class="form-select" id="fieldPriority">
+        <option value="must">⭐ Must-do</option>
+        <option value="nice">☆ Nice-to-have</option>
+        <option value="optional">— Optional</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Reservation</label>
+      <div class="checkbox-group">
+        <label class="checkbox-label">
+          <input type="checkbox" id="fieldReservationNeeded">
+          Needed
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="fieldReservationDone">
+          Confirmed ✓
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input form-textarea" id="fieldNotes" placeholder="Any notes, tips, or reminders…"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="deleteBtn" onclick="deleteActivity()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        Delete
+      </button>
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveActivity()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Save
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =============================================
+// SEED DATA — edit this to change default itinerary
+// =============================================
+const SEED_DATA = {
+  tripName: "Japan 2026",
+  travelers: "Cedric & Mickey",
+  origin: "AUS",
+  destination: "HND",
+  startDate: "2026-05-19",
+  endDate: "2026-05-30",
+  days: [
+    {
+      id: "d1", label: "Day 1", date: "2026-05-19", title: "Arrive Tokyo",
+      activities: [
+        { id: "a1", name: "Fly AUS → HND", time: "08:00", neighborhood: "Austin → Tokyo", address: "Haneda Airport, Tokyo", categories: ["travel"], priority: "must", cost: "", reservation: false, reservationDone: false, notes: "Depart Austin, arrive Tokyo next day. ~15 hr flight." },
+        { id: "a2", name: "Check in: Shinjuku Hotel", time: "20:00", neighborhood: "Shinjuku, Tokyo", address: "Shinjuku, Tokyo, Japan", categories: ["rest"], priority: "must", cost: "¥15,000/night", reservation: true, reservationDone: false, notes: "Grab shuttle from HND. Check in, freshen up." },
+        { id: "a3", name: "Shibuya Evening Walk", time: "21:00", neighborhood: "Shibuya, Tokyo", address: "Shibuya Crossing, Tokyo", categories: ["culture"], priority: "must", cost: "Free", reservation: false, reservationDone: false, notes: "Iconic crossing at night. Grab a coffee, soak in the vibe." },
+        { id: "a4", name: "Dinner: Ramen in Shinjuku", time: "22:00", neighborhood: "Shinjuku, Tokyo", address: "Ichiran Ramen Shinjuku, Tokyo", categories: ["food"], priority: "must", cost: "¥1,500", reservation: false, reservationDone: false, notes: "Ichiran or Fuunji. Late-night ramen is a rite of passage." }
+      ]
+    },
+    {
+      id: "d2", label: "Day 2", date: "2026-05-20", title: "Akihabara",
+      activities: [
+        { id: "a5", name: "Akihabara Electric Town", time: "11:00", neighborhood: "Akihabara, Tokyo", address: "Akihabara Electric Town, Tokyo", categories: ["anime","shopping"], priority: "must", cost: "Free to browse", reservation: false, reservationDone: false, notes: "Walk from the station. Multi-floor arcades, figures, electronics." },
+        { id: "a6", name: "Yodobashi Camera Akihabara", time: "12:00", neighborhood: "Akihabara, Tokyo", address: "Yodobashi Camera Akihabara, Tokyo", categories: ["shopping"], priority: "nice", cost: "Varies", reservation: false, reservationDone: false, notes: "Huge electronics & gaming mega-store. Tax-free with passport." },
+        { id: "a7", name: "Animate Akihabara", time: "13:00", neighborhood: "Akihabara, Tokyo", address: "Animate Akihabara, Tokyo", categories: ["anime"], priority: "must", cost: "Varies", reservation: false, reservationDone: false, notes: "Japan's biggest Animate. Tons of merch, manga, figures." },
+        { id: "a8", name: "Lunch in Akihabara", time: "14:00", neighborhood: "Akihabara, Tokyo", address: "AKB48 Café Akihabara, Tokyo", categories: ["food"], priority: "optional", cost: "¥1,500", reservation: false, reservationDone: false, notes: "" },
+        { id: "a9", name: "Gundam Café", time: "15:30", neighborhood: "Akihabara, Tokyo", address: "Gundam Café Akihabara, Tokyo", categories: ["food","anime"], priority: "nice", cost: "¥2,000", reservation: false, reservationDone: false, notes: "Themed drinks & snacks. Fun photo ops." },
+        { id: "a10", name: "Dinner: Izakaya", time: "19:00", neighborhood: "Akihabara, Tokyo", address: "Yurakucho Izakaya, Tokyo", categories: ["food"], priority: "must", cost: "¥3,000", reservation: false, reservationDone: false, notes: "Relax, beer, yakitori. Try a standing bar." }
+      ]
+    },
+    {
+      id: "d3", label: "Day 3", date: "2026-05-21", title: "Ikebukuro",
+      activities: [
+        { id: "a11", name: "Sunshine City", time: "10:00", neighborhood: "Ikebukuro, Tokyo", address: "Sunshine City Ikebukuro, Tokyo", categories: ["shopping","anime"], priority: "nice", cost: "Free entry", reservation: false, reservationDone: false, notes: "Massive complex. Namco arcade, aquarium, Pokémon Center inside." },
+        { id: "a12", name: "Pokémon Center Mega Tokyo", time: "11:00", neighborhood: "Ikebukuro, Tokyo", address: "Pokémon Center Mega Tokyo, Sunshine City, Ikebukuro", categories: ["anime"], priority: "must", cost: "Varies", reservation: true, reservationDone: false, notes: "Might need timed entry. Buy plushies, limited items. HUGE." },
+        { id: "a13", name: "Animate Ikebukuro (Main Store)", time: "13:00", neighborhood: "Ikebukuro, Tokyo", address: "Animate Ikebukuro Main Store, Tokyo", categories: ["anime"], priority: "nice", cost: "Varies", reservation: false, reservationDone: false, notes: "The Animate flagship. Multiple floors of merch." },
+        { id: "a14", name: "Lunch: Ikebukuro", time: "14:30", neighborhood: "Ikebukuro, Tokyo", address: "Ikebukuro, Tokyo", categories: ["food"], priority: "optional", cost: "¥1,200", reservation: false, reservationDone: false, notes: "" },
+        { id: "a15", name: "Evening: Explore Ikebukuro", time: "17:00", neighborhood: "Ikebukuro, Tokyo", address: "Ikebukuro West Gate Park, Tokyo", categories: ["culture"], priority: "optional", cost: "Free", reservation: false, reservationDone: false, notes: "West Gate Park, Tokyu Hands, Bunkamura area." }
+      ]
+    },
+    {
+      id: "d4", label: "Day 4", date: "2026-05-22", title: "Ghibli + Kichijoji",
+      activities: [
+        { id: "a16", name: "Ghibli Museum", time: "10:00", neighborhood: "Mitaka, Tokyo", address: "Ghibli Museum Mitaka, Tokyo", categories: ["culture"], priority: "must", cost: "¥1,000", reservation: true, reservationDone: false, notes: "MUST book well in advance at ghibli-museum.jp. Timed entry. No photos inside." },
+        { id: "a17", name: "Kichijoji: Shopping & Cafés", time: "13:00", neighborhood: "Kichijoji, Tokyo", address: "Kichijoji Station, Tokyo", categories: ["shopping","food"], priority: "nice", cost: "Varies", reservation: false, reservationDone: false, notes: "Inokashira Park nearby. Great thrift/vintage shops. Lovely vibe." },
+        { id: "a18", name: "Lunch near Nakano", time: "15:00", neighborhood: "Nakano, Tokyo", address: "Nakano, Tokyo", categories: ["food"], priority: "optional", cost: "¥1,500", reservation: false, reservationDone: false, notes: "" },
+        { id: "a19", name: "Nakano Broadway", time: "15:30", neighborhood: "Nakano, Tokyo", address: "Nakano Broadway, Tokyo", categories: ["anime","shopping"], priority: "must", cost: "Varies", reservation: false, reservationDone: false, notes: "Vintage collectibles, rare figures, doujin. More authentic than Akihabara for some." }
+      ]
+    },
+    {
+      id: "d5", label: "Day 5", date: "2026-05-23", title: "Yokohama Day Trip",
+      activities: [
+        { id: "a20", name: "Train to Yokohama", time: "09:30", neighborhood: "Yokohama", address: "Yokohama Station, Yokohama", categories: ["travel"], priority: "must", cost: "¥700", reservation: false, reservationDone: false, notes: "~30 min from Shinjuku on the Shonan-Shinjuku Line." },
+        { id: "a21", name: "Chinatown", time: "10:30", neighborhood: "Chukagai, Yokohama", address: "Yokohama Chinatown, Yokohama", categories: ["food","culture"], priority: "must", cost: "¥2,000", reservation: false, reservationDone: false, notes: "Largest Chinatown in Japan. Dim sum, dumplings, street food." },
+        { id: "a22", name: "Gundam Factory Yokohama", time: "13:00", neighborhood: "Yamashita, Yokohama", address: "Gundam Factory Yokohama", categories: ["anime"], priority: "nice", cost: "¥1,650", reservation: false, reservationDone: false, notes: "Life-size moveable Gundam. Check if still running — worth it!" },
+        { id: "a23", name: "Yokohama Harbor Walk", time: "15:00", neighborhood: "Minato Mirai, Yokohama", address: "Minato Mirai, Yokohama", categories: ["culture"], priority: "nice", cost: "Free", reservation: false, reservationDone: false, notes: "Osanbashi Pier, waterfront views, Landmark Tower area." },
+        { id: "a24", name: "Return to Tokyo", time: "18:00", neighborhood: "Yokohama → Shinjuku", address: "Yokohama Station, Yokohama", categories: ["travel"], priority: "must", cost: "¥700", reservation: false, reservationDone: false, notes: "" }
+      ]
+    },
+    {
+      id: "d6", label: "Day 6", date: "2026-05-24", title: "Harajuku + Shinjuku",
+      activities: [
+        { id: "a25", name: "Harajuku / Takeshita Street", time: "10:30", neighborhood: "Harajuku, Tokyo", address: "Takeshita Street, Harajuku, Tokyo", categories: ["shopping","culture"], priority: "must", cost: "Varies", reservation: false, reservationDone: false, notes: "Crepe shops, quirky fashion, arcades. Go early before crowds." },
+        { id: "a26", name: "Omotesando Browsing", time: "12:00", neighborhood: "Omotesando, Tokyo", address: "Omotesando Hills, Tokyo", categories: ["shopping"], priority: "nice", cost: "Varies", reservation: false, reservationDone: false, notes: "High-end brands + architecture. Spiral building, Prada building." },
+        { id: "a27", name: "Lunch: Harajuku", time: "13:30", neighborhood: "Harajuku, Tokyo", address: "Gyukatsu Motomura Harajuku, Tokyo", categories: ["food"], priority: "optional", cost: "¥1,800", reservation: false, reservationDone: false, notes: "" },
+        { id: "a28", name: "Possible Shibuya Meetup with Friend", time: "15:00", neighborhood: "Shibuya, Tokyo", address: "Shibuya, Tokyo", categories: ["culture"], priority: "nice", cost: "Free", reservation: false, reservationDone: false, notes: "TBD — coordinate with friend." },
+        { id: "a29", name: "Shinjuku Golden Gai Evening", time: "20:00", neighborhood: "Shinjuku, Tokyo", address: "Golden Gai, Shinjuku, Tokyo", categories: ["nightlife"], priority: "must", cost: "¥2,000–4,000", reservation: false, reservationDone: false, notes: "Tiny atmospheric bars. Most bars are foreigner-friendly. Cover charges vary." },
+        { id: "a29b", name: "Live Music: Shibuya Club (Mickey's pick)", time: "22:30", neighborhood: "Shibuya, Tokyo", address: "Shibuya, Tokyo, Japan", categories: ["nightlife"], priority: "nice", cost: "¥2,000–3,000", reservation: false, reservationDone: false, notes: "Mickey wants to catch a live set here — TBD on venue/artist. Shibuya has great small clubs and live houses (Club Quattro, WWW, Circus Tokyo). Worth coordinating in advance." }
+      ]
+    },
+    {
+      id: "d7", label: "Day 7", date: "2026-05-25", title: "Asakusa + Skytree",
+      activities: [
+        { id: "a30", name: "Senso-ji Temple, Asakusa", time: "09:00", neighborhood: "Asakusa, Tokyo", address: "Senso-ji Temple, Asakusa, Tokyo", categories: ["culture"], priority: "must", cost: "Free", reservation: false, reservationDone: false, notes: "Go early. Nakamise-dori shopping street. Rickshaw rides available." },
+        { id: "a31", name: "Tokyo Skytree + Solamachi", time: "11:30", neighborhood: "Oshiage, Tokyo", address: "Tokyo Skytree, Oshiage, Tokyo", categories: ["culture","shopping"], priority: "must", cost: "¥2,100–3,400", reservation: false, reservationDone: false, notes: "Book tower entry online. Solamachi mall below has great food options." },
+        { id: "a32", name: "Possible Kirby Café", time: "14:00", neighborhood: "Tokyo Skytree Town", address: "Kirby Café Tokyo Skytree Town", categories: ["food","anime"], priority: "nice", cost: "¥4,000", reservation: true, reservationDone: false, notes: "RESERVATION REQUIRED — book at kirbycafe.jp very early. Inside Solamachi." },
+        { id: "a33", name: "Dinner near Asakusa", time: "19:00", neighborhood: "Asakusa, Tokyo", address: "Asakusa, Tokyo", categories: ["food"], priority: "must", cost: "¥2,500", reservation: false, reservationDone: false, notes: "Try Sometaro (okonomiyaki) or Daikokuya (tempura)." }
+      ]
+    },
+    {
+      id: "d8", label: "Day 8", date: "2026-05-26", title: "teamLab + Roppongi",
+      activities: [
+        { id: "a34", name: "teamLab Borderless", time: "10:00", neighborhood: "Azabudai Hills, Tokyo", address: "teamLab Borderless, Azabudai Hills, Tokyo", categories: ["culture"], priority: "must", cost: "¥3,200", reservation: true, reservationDone: false, notes: "MUST BOOK in advance at borderless.teamlab.art. New location at Azabudai Hills. Wear white or light colors!" },
+        { id: "a35", name: "Tokyo Tower", time: "14:30", neighborhood: "Shiba-koen, Tokyo", address: "Tokyo Tower, Minato, Tokyo", categories: ["culture"], priority: "nice", cost: "¥1,200", reservation: false, reservationDone: false, notes: "Close to teamLab area. Iconic view. Main Deck or Top Deck." },
+        { id: "a36", name: "Roppongi Area Evening", time: "19:00", neighborhood: "Roppongi, Tokyo", address: "Roppongi Hills, Tokyo", categories: ["nightlife"], priority: "nice", cost: "Varies", reservation: false, reservationDone: false, notes: "Clubs, rooftop bars. Mori Art Museum is open late." },
+        { id: "a37", name: "Dinner: Roppongi", time: "20:00", neighborhood: "Roppongi, Tokyo", address: "Roppongi, Tokyo", categories: ["food"], priority: "must", cost: "¥3,000", reservation: false, reservationDone: false, notes: "" }
+      ]
+    },
+    {
+      id: "d9", label: "Day 9", date: "2026-05-27", title: "Osaka",
+      activities: [
+        { id: "a38", name: "Shinkansen Tokyo → Osaka", time: "08:00", neighborhood: "Tokyo → Osaka", address: "Shin-Osaka Station, Osaka", categories: ["travel"], priority: "must", cost: "¥13,000–14,000", reservation: true, reservationDone: false, notes: "Book reserved seats on Nozomi. Shin-Osaka to Dotonbori ~30 min." },
+        { id: "a39", name: "Check in Osaka Hotel", time: "11:00", neighborhood: "Namba, Osaka", address: "Namba, Osaka", categories: ["rest"], priority: "must", cost: "¥10,000/night", reservation: true, reservationDone: false, notes: "Store bags if too early to check in; hotel usually holds luggage." },
+        { id: "a40", name: "Dotonbori", time: "13:00", neighborhood: "Dotonbori, Osaka", address: "Dotonbori, Namba, Osaka", categories: ["food","culture"], priority: "must", cost: "¥3,000+", reservation: false, reservationDone: false, notes: "Glico Man sign! Street food: takoyaki, taiyaki, kushikatsu. Insane energy." },
+        { id: "a41", name: "Den Den Town", time: "16:00", neighborhood: "Nipponbashi, Osaka", address: "Den Den Town, Nipponbashi, Osaka", categories: ["anime","shopping"], priority: "must", cost: "Varies", reservation: false, reservationDone: false, notes: "Osaka's Akihabara. Retro games, manga, figures. More relaxed crowd." },
+        { id: "a42", name: "Takoyaki Dinner", time: "19:00", neighborhood: "Dotonbori, Osaka", address: "Wanaka Takoyaki, Dotonbori, Osaka", categories: ["food"], priority: "must", cost: "¥800", reservation: false, reservationDone: false, notes: "Takoyaki is Osaka-born. Wanaka or Aizuya are classics." }
+      ]
+    },
+    {
+      id: "d10", label: "Day 10", date: "2026-05-28", title: "USJ",
+      activities: [
+        { id: "a43", name: "Universal Studios Japan — Super Nintendo World", time: "08:00", neighborhood: "Sakurajima, Osaka", address: "Universal Studios Japan, Osaka", categories: ["culture","anime"], priority: "must", cost: "¥8,600+", reservation: true, reservationDone: false, notes: "BOOK EARLY — usj.co.jp. Get Express Pass or Super Nintendo World Area pass. Arrive at open!" },
+        { id: "a44", name: "USJ — Harry Potter, Minion Park etc.", time: "12:00", neighborhood: "USJ, Osaka", address: "Universal Studios Japan, Osaka", categories: ["culture"], priority: "nice", cost: "Included", reservation: false, reservationDone: false, notes: "Butterbeer, Minion rides, Hollywood Dream roller coaster." },
+        { id: "a45", name: "Shinkansen Back to Tokyo Evening", time: "18:00", neighborhood: "Osaka → Tokyo", address: "Shin-Osaka Station, Osaka", categories: ["travel"], priority: "must", cost: "¥13,000", reservation: true, reservationDone: false, notes: "Book a Nozomi back. ~2h 30min. Get ekiben (station bento) for dinner." },
+        { id: "a46", name: "Light Dinner on Arrival", time: "21:30", neighborhood: "Shinjuku, Tokyo", address: "Shinjuku, Tokyo", categories: ["food"], priority: "optional", cost: "¥1,500", reservation: false, reservationDone: false, notes: "Convenience store or ramen near hotel." }
+      ]
+    },
+    {
+      id: "d11", label: "Day 11", date: "2026-05-29", title: "Tokyo Favorites & Farewell",
+      activities: [
+        { id: "a47", name: "Morning: Last Gifts & Favorites", time: "10:00", neighborhood: "Tokyo", address: "Shinjuku, Tokyo", categories: ["shopping"], priority: "nice", cost: "Varies", reservation: false, reservationDone: false, notes: "Don Quijote, Loft, or any missed spots. Hit the duty-free stores." },
+        { id: "a48", name: "Friend Hangout", time: "13:00", neighborhood: "Tokyo", address: "Tokyo, Japan", categories: ["culture"], priority: "nice", cost: "Varies", reservation: false, reservationDone: false, notes: "TBD — coordinate with local friend." },
+        { id: "a49", name: "Last Dinner — Somewhere Special", time: "19:00", neighborhood: "Tokyo", address: "Narisawa Restaurant, Tokyo", categories: ["food"], priority: "must", cost: "¥10,000+", reservation: true, reservationDone: false, notes: "Make it count! Splurge on a kaiseki or sushi omakase. Book well in advance." },
+        { id: "a50", name: "Pack for Departure", time: "22:00", neighborhood: "Hotel, Shinjuku", address: "Shinjuku, Tokyo", categories: ["rest"], priority: "must", cost: "Free", reservation: false, reservationDone: false, notes: "Weigh bags. Use luggage forwarding service (Yamato) if needed — can send bags to HND." }
+      ]
+    },
+    {
+      id: "d12", label: "Day 12", date: "2026-05-30", title: "Departure",
+      activities: [
+        { id: "a51", name: "Last-Minute Konbini Run", time: "07:00", neighborhood: "Shinjuku, Tokyo", address: "7-Eleven Shinjuku, Tokyo", categories: ["food"], priority: "must", cost: "¥1,000", reservation: false, reservationDone: false, notes: "Stock up on snacks for the flight: onigiri, chips, Pocky, drinks." },
+        { id: "a52", name: "Depart HND", time: "11:00", neighborhood: "Haneda, Tokyo", address: "Haneda Airport Tokyo International, Tokyo", categories: ["travel"], priority: "must", cost: "", reservation: true, reservationDone: false, notes: "Keikyu Line from Shinjuku area, or Airport Limousine Bus. Allow 2h before departure." }
+      ]
+    }
+  ]
+};
+
+// =============================================
+// STATE
+// =============================================
+let itinerary = null;
+let activeDayIndex = 0;
+let editingDayId = null;
+let editingActivityId = null;
+let isNewActivity = false;
+let parsedImportData = null;
+let isPresentationMode = false;
+
+// =============================================
+// CATEGORIES CONFIG
+// =============================================
+const CATEGORIES = [
+  { key: "anime",    label: "Anime 🎌",    cls: "badge-anime" },
+  { key: "food",     label: "Food 🍜",     cls: "badge-food" },
+  { key: "shopping", label: "Shopping 🛍", cls: "badge-shopping" },
+  { key: "culture",  label: "Culture 🏛",  cls: "badge-culture" },
+  { key: "nightlife",label: "Nightlife 🌙",cls: "badge-nightlife" },
+  { key: "travel",   label: "Travel ✈",   cls: "badge-travel" },
+  { key: "rest",     label: "Rest 🛌",     cls: "badge-rest" }
+];
+
+// =============================================
+// INIT
+// =============================================
+function init() {
+  const saved = localStorage.getItem('japan-2026-itinerary');
+  if (saved) {
+    try { itinerary = JSON.parse(saved); }
+    catch(e) { itinerary = deepClone(SEED_DATA); }
+  } else {
+    itinerary = deepClone(SEED_DATA);
+  }
+  render();
+}
+
+function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+function save() {
+  localStorage.setItem('japan-2026-itinerary', JSON.stringify(itinerary));
+}
+
+// =============================================
+// RENDER
+// =============================================
+function render() {
+  renderDayTabs();
+  renderDaySections();
+  if (activeDayIndex >= itinerary.days.length) activeDayIndex = 0;
+  setActiveDay(activeDayIndex, false);
+}
+
+function renderDayTabs() {
+  const container = document.getElementById('dayTabs');
+  container.innerHTML = '';
+  itinerary.days.forEach((day, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'day-tab' + (i === activeDayIndex ? ' active' : '');
+    btn.textContent = day.label + ' · ' + formatDate(day.date);
+    btn.onclick = () => setActiveDay(i);
+    container.appendChild(btn);
+  });
+}
+
+function renderDaySections() {
+  const container = document.getElementById('daySections');
+  container.innerHTML = '';
+  itinerary.days.forEach((day, i) => {
+    container.appendChild(buildDaySection(day, i));
+  });
+}
+
+function buildDaySection(day, dayIndex) {
+  const section = document.createElement('div');
+  section.className = 'day-section' + (dayIndex === activeDayIndex ? ' active' : '');
+  section.id = 'day-' + day.id;
+
+  // Summary counts
+  const mustCount = day.activities.filter(a => a.favorited).length;
+  const resCount = day.activities.filter(a => a.reservation && !a.reservationDone).length;
+  const totalCost = calcDayCost(day);
+
+  section.innerHTML = `
+    <div class="day-section-header">
+      <div>
+        <div class="day-section-title">${escHtml(day.title)}</div>
+        <div class="day-section-subtitle">${day.label} · ${formatDateLong(day.date)}</div>
+      </div>
+      <button class="day-route-btn" onclick="openDayRoute(${dayIndex})">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+        Route
+      </button>
+    </div>
+    <div class="activities-list" id="list-${day.id}" data-day-id="${day.id}"></div>
+    <div class="day-summary">
+      <div class="summary-item">
+        <div class="summary-value">${totalCost > 0 ? '¥' + totalCost.toLocaleString() : '—'}</div>
+        <div class="summary-label">Est. Cost</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-value">♥ ${mustCount}</div>
+        <div class="summary-label">Favorites</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-value">${resCount > 0 ? '📅 ' + resCount : '—'}</div>
+        <div class="summary-label">Reservations</div>
+      </div>
+    </div>
+    <button class="add-activity-btn" onclick="openNewActivity('${day.id}')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Activity
+    </button>
+  `;
+
+  const list = section.querySelector('#list-' + day.id);
+  day.activities.forEach((act, actIndex) => {
+    list.appendChild(buildActivityCard(act, actIndex, day));
+  });
+
+  setupDragDrop(list, day.id);
+
+  return section;
+}
+
+function buildActivityCard(act, stopIndex, day) {
+  const card = document.createElement('div');
+  card.className = 'activity-card';
+  card.draggable = true;
+  card.dataset.activityId = act.id;
+
+  const timeStr = act.time ? formatTime(act.time) : '';
+  const stopLabel = `Stop ${stopIndex + 1}${timeStr ? ' · ' + timeStr : ''}`;
+  const isFav = !!act.favorited;
+  const hasNotes = act.notes && act.notes.trim().length > 0;
+
+  let badgesHtml = '';
+  (act.categories || []).forEach(cat => {
+    const c = CATEGORIES.find(x => x.key === cat);
+    if (c) badgesHtml += `<span class="badge ${c.cls}">${c.label}</span>`;
+  });
+  if (act.cost) badgesHtml += `<span class="badge badge-cost">${escHtml(act.cost)}</span>`;
+  if (act.reservation && !act.reservationDone) badgesHtml += `<span class="badge badge-reservation">📅 Reserve</span>`;
+  if (act.reservationDone) badgesHtml += `<span class="badge badge-reservation">✓ Reserved</span>`;
+
+  card.innerHTML = `
+    <div class="card-main">
+      <div class="drag-handle" title="Drag to reorder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      </div>
+      <div class="card-content">
+        <div class="card-stop-time">${escHtml(stopLabel)}</div>
+        <div class="card-location-name">${escHtml(act.name)}</div>
+        ${act.neighborhood ? `<div class="card-neighborhood">${escHtml(act.neighborhood)}</div>` : ''}
+        <div class="card-badges">${badgesHtml}</div>
+      </div>
+      <div class="card-right">
+        <button class="heart-btn${isFav ? ' favorited' : ''}" onclick="toggleFavorite(event,'${day.id}','${act.id}')" title="${isFav ? 'Remove from favorites' : 'Add to favorites'}">
+          ${isFav
+            ? `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`
+            : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`
+          }
+        </button>
+        <button class="map-btn" onclick="openMaps(event, '${encodeURIComponent(act.address || act.name)}')" title="Open in Google Maps">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </button>
+      </div>
+    </div>
+    ${hasNotes ? `
+      <div class="card-notes-toggle" onclick="toggleNotes(event, this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        Notes
+      </div>
+      <div class="card-notes">${escHtml(act.notes)}</div>
+    ` : ''}
+  `;
+
+  card.addEventListener('click', (e) => {
+    if (e.target.closest('.map-btn') || e.target.closest('.drag-handle') || e.target.closest('.card-notes-toggle') || e.target.closest('.heart-btn')) return;
+    openEditActivity(day.id, act.id);
+  });
+
+  return card;
+}
+
+// =============================================
+// DAY SWITCHING
+// =============================================
+function setActiveDay(index, doScroll = true) {
+  activeDayIndex = index;
+
+  // Update tabs
+  document.querySelectorAll('.day-tab').forEach((t, i) => {
+    t.classList.toggle('active', i === index);
+  });
+
+  // Update sections
+  document.querySelectorAll('.day-section').forEach((s, i) => {
+    s.classList.toggle('active', i === index);
+  });
+
+  if (doScroll) {
+    const activeTab = document.querySelectorAll('.day-tab')[index];
+    if (activeTab) activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+// =============================================
+// DRAG & DROP REORDER
+// =============================================
+function setupDragDrop(listEl, dayId) {
+  let dragSrc = null;
+
+  listEl.querySelectorAll('.activity-card').forEach(card => {
+    card.addEventListener('dragstart', (e) => {
+      dragSrc = card;
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+
+    card.addEventListener('dragend', () => {
+      card.classList.remove('dragging');
+      listEl.querySelectorAll('.activity-card').forEach(c => c.classList.remove('drag-over'));
+      saveReorder(listEl, dayId);
+    });
+
+    card.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      listEl.querySelectorAll('.activity-card').forEach(c => c.classList.remove('drag-over'));
+      if (card !== dragSrc) card.classList.add('drag-over');
+    });
+
+    card.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (dragSrc && dragSrc !== card) {
+        const cards = [...listEl.querySelectorAll('.activity-card')];
+        const srcIdx = cards.indexOf(dragSrc);
+        const dstIdx = cards.indexOf(card);
+        if (srcIdx < dstIdx) {
+          listEl.insertBefore(dragSrc, card.nextSibling);
+        } else {
+          listEl.insertBefore(dragSrc, card);
+        }
+      }
+    });
+  });
+}
+
+function saveReorder(listEl, dayId) {
+  const day = itinerary.days.find(d => d.id === dayId);
+  if (!day) return;
+  const newOrder = [...listEl.querySelectorAll('.activity-card')].map(c => c.dataset.activityId);
+  day.activities.sort((a, b) => newOrder.indexOf(a.id) - newOrder.indexOf(b.id));
+  save();
+  // Re-render stop numbers without full re-render
+  rerenderActivityList(dayId);
+}
+
+function rerenderActivityList(dayId) {
+  const day = itinerary.days.find(d => d.id === dayId);
+  if (!day) return;
+  const list = document.getElementById('list-' + dayId);
+  if (!list) return;
+  list.innerHTML = '';
+  day.activities.forEach((act, i) => list.appendChild(buildActivityCard(act, i, day)));
+  setupDragDrop(list, dayId);
+}
+
+// =============================================
+// MAPS
+// =============================================
+function openMaps(e, encodedQuery) {
+  e.stopPropagation();
+  window.open(`https://www.google.com/maps/search/?api=1&query=${encodedQuery}`, '_blank');
+}
+
+function openDayRoute(dayIndex) {
+  const idx = dayIndex !== undefined ? dayIndex : activeDayIndex;
+  const day = itinerary.days[idx];
+  if (!day) return;
+  const stops = day.activities
+    .map(a => a.address || a.name)
+    .filter(Boolean)
+    .slice(0, 8);
+  if (stops.length === 0) { showToast('No stops to navigate'); return; }
+  const url = 'https://www.google.com/maps/dir/' + stops.map(s => encodeURIComponent(s)).join('/');
+  window.open(url, '_blank');
+}
+
+// =============================================
+// NOTES TOGGLE
+// =============================================
+function toggleNotes(e, toggleEl) {
+  e.stopPropagation();
+  const card = toggleEl.closest('.activity-card');
+  const notesEl = card.querySelector('.card-notes');
+  const isOpen = notesEl.classList.toggle('open');
+  toggleEl.classList.toggle('open', isOpen);
+}
+
+// =============================================
+// MODAL — EDIT ACTIVITY
+// =============================================
+function buildCategoryGrid(selectedCats) {
+  const grid = document.getElementById('categoryGrid');
+  grid.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const label = document.createElement('label');
+    label.className = 'category-check' + (selectedCats.includes(cat.key) ? ' checked' : '');
+    label.innerHTML = `<input type="checkbox" value="${cat.key}" ${selectedCats.includes(cat.key) ? 'checked' : ''}>${cat.label}`;
+    label.querySelector('input').addEventListener('change', function() {
+      label.classList.toggle('checked', this.checked);
+    });
+    grid.appendChild(label);
+  });
+}
+
+function openEditActivity(dayId, actId) {
+  const day = itinerary.days.find(d => d.id === dayId);
+  if (!day) return;
+  const act = day.activities.find(a => a.id === actId);
+  if (!act) return;
+
+  editingDayId = dayId;
+  editingActivityId = actId;
+  isNewActivity = false;
+
+  document.getElementById('modalTitle').textContent = 'Edit Activity';
+  document.getElementById('deleteBtn').style.display = '';
+  document.getElementById('fieldName').value = act.name || '';
+  document.getElementById('fieldTime').value = act.time || '';
+  document.getElementById('fieldCost').value = act.cost || '';
+  document.getElementById('fieldNeighborhood').value = act.neighborhood || '';
+  document.getElementById('fieldAddress').value = act.address || '';
+  document.getElementById('fieldPriority').value = act.priority || 'optional';
+  document.getElementById('fieldReservationNeeded').checked = act.reservation || false;
+  document.getElementById('fieldReservationDone').checked = act.reservationDone || false;
+  document.getElementById('fieldNotes').value = act.notes || '';
+  buildCategoryGrid(act.categories || []);
+
+  openModal();
+}
+
+function openNewActivity(dayId) {
+  editingDayId = dayId;
+  editingActivityId = null;
+  isNewActivity = true;
+
+  document.getElementById('modalTitle').textContent = 'Add Activity';
+  document.getElementById('deleteBtn').style.display = 'none';
+  document.getElementById('fieldName').value = '';
+  document.getElementById('fieldTime').value = '';
+  document.getElementById('fieldCost').value = '';
+  document.getElementById('fieldNeighborhood').value = '';
+  document.getElementById('fieldAddress').value = '';
+  document.getElementById('fieldPriority').value = 'optional';
+  document.getElementById('fieldReservationNeeded').checked = false;
+  document.getElementById('fieldReservationDone').checked = false;
+  document.getElementById('fieldNotes').value = '';
+  buildCategoryGrid([]);
+
+  openModal();
+}
+
+function saveActivity() {
+  const name = document.getElementById('fieldName').value.trim();
+  if (!name) { document.getElementById('fieldName').focus(); return; }
+
+  const cats = [...document.querySelectorAll('#categoryGrid input:checked')].map(i => i.value);
+
+  const data = {
+    name,
+    time: document.getElementById('fieldTime').value,
+    cost: document.getElementById('fieldCost').value.trim(),
+    neighborhood: document.getElementById('fieldNeighborhood').value.trim(),
+    address: document.getElementById('fieldAddress').value.trim(),
+    categories: cats,
+    priority: document.getElementById('fieldPriority').value,
+    reservation: document.getElementById('fieldReservationNeeded').checked,
+    reservationDone: document.getElementById('fieldReservationDone').checked,
+    notes: document.getElementById('fieldNotes').value.trim()
+  };
+
+  const day = itinerary.days.find(d => d.id === editingDayId);
+  if (!day) return;
+
+  if (isNewActivity) {
+    data.id = 'a' + Date.now();
+    day.activities.push(data);
+  } else {
+    const idx = day.activities.findIndex(a => a.id === editingActivityId);
+    if (idx >= 0) day.activities[idx] = { ...day.activities[idx], ...data };
+  }
+
+  save();
+  closeModal();
+  rerenderActivityList(editingDayId);
+  updateDaySummary(editingDayId);
+  showToast(isNewActivity ? 'Activity added' : 'Changes saved');
+}
+
+function deleteActivity() {
+  if (!confirm('Delete this activity?')) return;
+  const day = itinerary.days.find(d => d.id === editingDayId);
+  if (!day) return;
+  day.activities = day.activities.filter(a => a.id !== editingActivityId);
+  save();
+  closeModal();
+  rerenderActivityList(editingDayId);
+  updateDaySummary(editingDayId);
+  showToast('Activity deleted');
+}
+
+function updateDaySummary(dayId) {
+  const day = itinerary.days.find(d => d.id === dayId);
+  if (!day) return;
+  const section = document.getElementById('day-' + dayId);
+  if (!section) return;
+  const items = section.querySelectorAll('.summary-item .summary-value');
+  const totalCost = calcDayCost(day);
+  const mustCount = day.activities.filter(a => a.priority === 'must').length;
+  const resCount = day.activities.filter(a => a.reservation && !a.reservationDone).length;
+  if (items[0]) items[0].textContent = totalCost > 0 ? '¥' + totalCost.toLocaleString() : '—';
+  if (items[1]) items[1].textContent = '⭐ ' + mustCount;
+  if (items[2]) items[2].textContent = resCount > 0 ? '📅 ' + resCount : '—';
+}
+
+function openModal() {
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('fieldName').focus(), 350);
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeModalOnBackdrop(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+// =============================================
+// ADD DAY
+// =============================================
+function addDay() {
+  const lastDay = itinerary.days[itinerary.days.length - 1];
+  const lastDate = lastDay ? new Date(lastDay.date + 'T00:00:00') : new Date();
+  lastDate.setDate(lastDate.getDate() + 1);
+  const dateStr = lastDate.toISOString().split('T')[0];
+  const newDayNum = itinerary.days.length + 1;
+
+  const newDay = {
+    id: 'd' + Date.now(),
+    label: 'Day ' + newDayNum,
+    date: dateStr,
+    title: 'New Day',
+    activities: []
+  };
+
+  itinerary.days.push(newDay);
+  save();
+  render();
+  setActiveDay(itinerary.days.length - 1);
+  showToast('Day added');
+}
+
+// =============================================
+// PANELS (Import/Export)
+// =============================================
+function togglePanel(name) {
+  const body = document.getElementById(name + 'Body');
+  const chevron = document.getElementById(name + 'Chevron');
+  const isOpen = body.classList.toggle('open');
+  chevron.classList.toggle('open', isOpen);
+}
+
+// =============================================
+// IMPORT
+// =============================================
+function parseImport() {
+  const raw = document.getElementById('importText').value.trim();
+  if (!raw) return;
+
+  let parsed = null;
+
+  // Try JSON
+  if (raw.startsWith('{') || raw.startsWith('[')) {
+    try {
+      const obj = JSON.parse(raw);
+      if (obj.days && Array.isArray(obj.days)) {
+        parsed = obj;
+      }
+    } catch(e) {}
+  }
+
+  // Try markdown / text
+  if (!parsed) {
+    parsed = parseTextItinerary(raw);
+  }
+
+  const preview = document.getElementById('importPreview');
+  const importBtn = document.getElementById('importBtn');
+
+  if (parsed && parsed.days && parsed.days.length > 0) {
+    parsedImportData = parsed;
+    let html = `<strong>Found ${parsed.days.length} day(s):</strong><br>`;
+    parsed.days.forEach(d => {
+      html += `• ${d.label || d.title}: ${d.activities.length} activit${d.activities.length !== 1 ? 'ies' : 'y'}<br>`;
+    });
+    preview.innerHTML = html;
+    preview.style.display = 'block';
+    importBtn.disabled = false;
+  } else {
+    preview.innerHTML = '<span style="color:#d44">Could not parse. Importing as notes on Day 1.</span>';
+    preview.style.display = 'block';
+    parsedImportData = {
+      days: [{
+        id: 'd' + Date.now(),
+        label: 'Day (Imported)',
+        date: itinerary.startDate,
+        title: 'Imported Notes',
+        activities: [{
+          id: 'a' + Date.now(),
+          name: 'Imported Content',
+          time: '',
+          neighborhood: '',
+          address: '',
+          categories: [],
+          priority: 'optional',
+          cost: '',
+          reservation: false,
+          reservationDone: false,
+          notes: raw.slice(0, 500)
+        }]
+      }]
+    };
+    importBtn.disabled = false;
+  }
+}
+
+function parseTextItinerary(text) {
+  const lines = text.split('\n');
+  const days = [];
+  let currentDay = null;
+
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+
+    // Day heading patterns: "Day 1:", "## Day 2", "Day 1 · May 19"
+    const dayMatch = trimmed.match(/^(?:##?\s*)?Day\s*(\d+)[:\s·]*(.*)$/i);
+    if (dayMatch) {
+      currentDay = {
+        id: 'd' + Date.now() + days.length,
+        label: 'Day ' + dayMatch[1],
+        date: '',
+        title: dayMatch[2].split(':').pop().trim() || 'Day ' + dayMatch[1],
+        activities: []
+      };
+      days.push(currentDay);
+      return;
+    }
+
+    if (!currentDay) {
+      currentDay = { id: 'd' + Date.now(), label: 'Day 1', date: '', title: 'Imported', activities: [] };
+      days.push(currentDay);
+    }
+
+    // Activity: "- Name (category) [time] [cost]"
+    const actMatch = trimmed.match(/^[-*•]\s*(.+)/);
+    if (actMatch) {
+      const content = actMatch[1];
+      const timeMatch = content.match(/(\d{1,2}:\d{2}\s*(?:AM|PM)?)/i);
+      const costMatch = content.match(/(¥[\d,]+|\$[\d,.]+|USD?\s*[\d,.]+)/i);
+      const name = content.replace(/\s*\(.*?\)\s*/g,'').replace(/(¥[\d,]+|\$[\d,.]+)/g,'').replace(/\d{1,2}:\d{2}\s*(?:AM|PM)?/gi,'').trim().replace(/[:—-]+$/, '').trim();
+      currentDay.activities.push({
+        id: 'a' + Date.now() + Math.random(),
+        name: name || content.slice(0, 60),
+        time: timeMatch ? timeMatch[1] : '',
+        neighborhood: '',
+        address: name || content.slice(0, 60),
+        categories: inferCategories(content),
+        priority: content.toLowerCase().includes('must') ? 'must' : content.toLowerCase().includes('nice') ? 'nice' : 'optional',
+        cost: costMatch ? costMatch[1] : '',
+        reservation: content.toLowerCase().includes('reserv'),
+        reservationDone: false,
+        notes: ''
+      });
+    }
+  });
+
+  return days.length > 0 ? { days } : null;
+}
+
+function inferCategories(text) {
+  const t = text.toLowerCase();
+  const cats = [];
+  if (t.includes('anime') || t.includes('manga') || t.includes('ghibli') || t.includes('pokémon') || t.includes('pokemon') || t.includes('gundam') || t.includes('kirby')) cats.push('anime');
+  if (t.includes('food') || t.includes('eat') || t.includes('dinner') || t.includes('lunch') || t.includes('breakfast') || t.includes('café') || t.includes('cafe') || t.includes('ramen') || t.includes('sushi')) cats.push('food');
+  if (t.includes('shop') || t.includes('buy') || t.includes('store') || t.includes('mall')) cats.push('shopping');
+  if (t.includes('temple') || t.includes('museum') || t.includes('culture') || t.includes('art') || t.includes('walk') || t.includes('park')) cats.push('culture');
+  if (t.includes('bar') || t.includes('club') || t.includes('night') || t.includes('gai')) cats.push('nightlife');
+  if (t.includes('train') || t.includes('fly') || t.includes('flight') || t.includes('shinkansen') || t.includes('airport') || t.includes('depart')) cats.push('travel');
+  if (t.includes('hotel') || t.includes('check in') || t.includes('rest') || t.includes('sleep') || t.includes('pack')) cats.push('rest');
+  return cats.length > 0 ? cats : ['culture'];
+}
+
+function doImport() {
+  if (!parsedImportData) return;
+  if (!confirm(`Import ${parsedImportData.days.length} day(s)? This will ADD to your current itinerary.`)) return;
+  parsedImportData.days.forEach(d => itinerary.days.push(d));
+  save();
+  render();
+  document.getElementById('importText').value = '';
+  document.getElementById('importPreview').style.display = 'none';
+  document.getElementById('importBtn').disabled = true;
+  parsedImportData = null;
+  showToast('Imported successfully');
+}
+
+function loadJsonFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('importText').value = e.target.result;
+    document.getElementById('fileStatus').textContent = file.name;
+    parseImport();
+  };
+  reader.readAsText(file);
+}
+
+// =============================================
+// EXPORT
+// =============================================
+function exportJSON() {
+  const json = JSON.stringify(itinerary, null, 2);
+  downloadFile('japan-2026-itinerary.json', json, 'application/json');
+  showToast('JSON downloaded');
+}
+
+function exportMarkdown() {
+  let md = `# ${itinerary.tripName}\n`;
+  md += `**${itinerary.travelers}** · ${formatDateLong(itinerary.startDate)} – ${formatDateLong(itinerary.endDate)}\n\n`;
+  itinerary.days.forEach(day => {
+    md += `## ${day.label} · ${formatDateLong(day.date)}: ${day.title}\n\n`;
+    day.activities.forEach((act, i) => {
+      const time = act.time ? formatTime(act.time) : '';
+      const cats = (act.categories || []).join(', ');
+      const star = act.priority === 'must' ? ' ⭐' : act.priority === 'nice' ? ' ☆' : '';
+      md += `${i+1}. **${act.name}**${star}`;
+      if (time) md += ` · ${time}`;
+      if (act.neighborhood) md += ` · ${act.neighborhood}`;
+      if (cats) md += ` \`${cats}\``;
+      if (act.cost) md += ` · ${act.cost}`;
+      if (act.reservation) md += act.reservationDone ? ' 📅✓' : ' 📅 RESERVE';
+      md += '\n';
+      if (act.notes) md += `   > ${act.notes}\n`;
+    });
+    md += '\n';
+  });
+  downloadFile('japan-2026-itinerary.md', md, 'text/markdown');
+  showToast('Markdown downloaded');
+}
+
+function downloadFile(filename, content, type) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// =============================================
+// PRESENTATION MODE
+// =============================================
+function togglePresentation() {
+  isPresentationMode = !isPresentationMode;
+  document.body.classList.toggle('presentation-mode', isPresentationMode);
+  showToast(isPresentationMode ? 'Presentation mode on — tap again to exit' : 'Presentation mode off');
+}
+
+// =============================================
+// RESET
+// =============================================
+function confirmReset() {
+  if (!confirm('Reset to default seed data? All your changes will be lost.')) return;
+  itinerary = deepClone(SEED_DATA);
+  save();
+  activeDayIndex = 0;
+  render();
+  showToast('Reset to default');
+}
+
+// =============================================
+// FAVORITES (HEARTS)
+// =============================================
+function toggleFavorite(event, dayId, actId) {
+  event.stopPropagation();
+  const day = itinerary.days.find(d => d.id === dayId);
+  if (!day) return;
+  const act = day.activities.find(a => a.id === actId);
+  if (!act) return;
+  act.favorited = !act.favorited;
+  save();
+
+  const card = document.querySelector(`[data-activity-id="${actId}"]`);
+  if (!card) return;
+  const btn = card.querySelector('.heart-btn');
+  if (!btn) return;
+
+  const heartFilled = `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+  const heartEmpty = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+
+  btn.innerHTML = act.favorited ? heartFilled : heartEmpty;
+  btn.classList.toggle('favorited', act.favorited);
+  btn.title = act.favorited ? 'Remove from favorites' : 'Add to favorites';
+
+  // Update the day summary heart count without full re-render
+  const section = document.getElementById('day-' + dayId);
+  if (section) {
+    const favCount = day.activities.filter(a => a.favorited).length;
+    const sumVal = section.querySelector('.summary-item:nth-child(2) .summary-value');
+    if (sumVal) sumVal.textContent = '♥ ' + favCount;
+  }
+}
+
+// =============================================
+// TOAST
+// =============================================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// =============================================
+// HELPERS
+// =============================================
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function formatDateLong(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+}
+
+function formatTime(t) {
+  if (!t) return '';
+  const [h, m] = t.split(':').map(Number);
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const hh = h % 12 || 12;
+  return `${hh}:${String(m).padStart(2,'0')} ${ampm}`;
+}
+
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function calcDayCost(day) {
+  let total = 0;
+  day.activities.forEach(a => {
+    if (!a.cost) return;
+    const match = a.cost.replace(/,/g,'').match(/[\d]+/);
+    if (match) total += parseInt(match[0]);
+  });
+  return total;
+}
+
+// =============================================
+// TRIP CONFIG (header airport/date editing)
+// =============================================
+const TRIP_CONFIG_DEFAULTS = {
+  fromCode: 'AUS',
+  fromCity: 'Austin',
+  toCode: 'HND',
+  toCity: 'Tokyo',
+  depDate: '2026-05-19',
+  retDate: '2026-05-30'
+};
+
+let tripConfig = TRIP_CONFIG_DEFAULTS;
+
+function loadTripConfig() {
+  const saved = localStorage.getItem('japan-trip-config');
+  if (saved) {
+    try { tripConfig = { ...TRIP_CONFIG_DEFAULTS, ...JSON.parse(saved) }; }
+    catch(e) { tripConfig = { ...TRIP_CONFIG_DEFAULTS }; }
+  } else {
+    tripConfig = { ...TRIP_CONFIG_DEFAULTS };
+  }
+  applyTripConfig();
+}
+
+function saveTripConfigToStorage() {
+  localStorage.setItem('japan-trip-config', JSON.stringify(tripConfig));
+}
+
+function applyTripConfig() {
+  document.getElementById('headerFrom').textContent = (tripConfig.fromCode || '???').toUpperCase();
+  document.getElementById('headerTo').textContent = (tripConfig.toCode || '???').toUpperCase();
+  document.getElementById('headerFromCity').textContent = tripConfig.fromCity || '';
+  document.getElementById('headerToCity').textContent = tripConfig.toCity || '';
+
+  // Format dates as MM/DD
+  function fmtShort(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr + 'T00:00:00');
+    if (isNaN(d)) return dateStr;
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return mm + '/' + dd;
+  }
+  document.getElementById('headerDepDate').textContent = fmtShort(tripConfig.depDate);
+  document.getElementById('headerArrDate').textContent = fmtShort(tripConfig.retDate);
+}
+
+function openTripConfig() {
+  document.getElementById('cfgFromCode').value = tripConfig.fromCode;
+  document.getElementById('cfgToCode').value = tripConfig.toCode;
+  document.getElementById('cfgFromCity').value = tripConfig.fromCity;
+  document.getElementById('cfgToCity').value = tripConfig.toCity;
+  document.getElementById('cfgDepDate').value = tripConfig.depDate;
+  document.getElementById('cfgRetDate').value = tripConfig.retDate;
+  document.getElementById('configModalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeTripConfig() {
+  document.getElementById('configModalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeConfigModalOnBackdrop(e) {
+  if (e.target === document.getElementById('configModalOverlay')) closeTripConfig();
+}
+
+function saveTripConfig() {
+  tripConfig = {
+    fromCode: (document.getElementById('cfgFromCode').value.trim() || 'AUS').toUpperCase(),
+    fromCity: document.getElementById('cfgFromCity').value.trim() || 'Austin',
+    toCode: (document.getElementById('cfgToCode').value.trim() || 'HND').toUpperCase(),
+    toCity: document.getElementById('cfgToCity').value.trim() || 'Tokyo',
+    depDate: document.getElementById('cfgDepDate').value || '2026-05-19',
+    retDate: document.getElementById('cfgRetDate').value || '2026-05-30'
+  };
+  saveTripConfigToStorage();
+  applyTripConfig();
+  closeTripConfig();
+  showToast('Trip updated');
+}
+
+// =============================================
+// SCROLL SPREAD ANIMATION
+// =============================================
+(function () {
+  const SCROLL_MAX  = 80;   // px scroll to reach full effect
+  const SPREAD_PX   = 120;  // max translateX each side — pushes to screen edges
+  const SCALE_END   = 0.72; // shrink to 72% at full scroll
+  const OPACITY_MIN = 0.18; // very faint at full scroll
+
+  function onScroll() {
+    const progress = Math.min(window.scrollY, SCROLL_MAX) / SCROLL_MAX;
+    const spread   = progress * SPREAD_PX;
+    const scale    = 1 - progress * (1 - SCALE_END);
+    const opacity  = 1 - progress * (1 - OPACITY_MIN);
+
+    const from = document.getElementById('headerFrom');
+    const to   = document.getElementById('headerTo');
+    const swap = document.querySelector('.airport-hero-swap');
+    const cityRow = document.querySelector('.airport-city-row');
+    if (!from || !to) return;
+
+    from.style.transform       = `translateX(-${spread}px) scale(${scale})`;
+    from.style.transformOrigin = 'left center';
+    from.style.opacity         = opacity;
+
+    to.style.transform       = `translateX(${spread}px) scale(${scale})`;
+    to.style.transformOrigin = 'right center';
+    to.style.opacity         = opacity;
+
+    if (swap)    swap.style.opacity    = (1 - progress).toString();
+    if (cityRow) cityRow.style.opacity = (1 - progress * 1.5).toString();
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+}());
+
+// =============================================
+// BOOT
+// =============================================
+loadTripConfig();
+init();
+</script>
+</body>
+</html>

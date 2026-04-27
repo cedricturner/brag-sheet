@@ -1,0 +1,576 @@
+<!-- DRAFT: local only, not deployed -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>where i've been — Cedric Turner II</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #fafaf9;
+    color: #1c1c1c;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 16px;
+    line-height: 1.8;
+    padding: 60px 24px 120px;
+  }
+
+  .wrap {
+    max-width: 620px;
+    margin: 0 auto;
+  }
+
+  /* Nav */
+  .nav {
+    margin-bottom: 56px;
+  }
+
+  .nav a {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: #888;
+    text-decoration: none;
+    letter-spacing: 0.03em;
+  }
+
+  .nav a:hover {
+    color: #1c1c1c;
+  }
+
+  /* Hero */
+  .hero {
+    margin-bottom: 48px;
+  }
+
+  .hero h1 {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #1c1c1c;
+    margin-bottom: 8px;
+  }
+
+  .hero .subtitle {
+    font-size: 15px;
+    color: #888;
+  }
+
+  /* Map */
+  .map-wrap {
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 56px;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  #world-map {
+    height: 340px;
+    width: 100%;
+  }
+
+  .leaflet-container {
+    background: #f0ede8;
+    font-family: inherit;
+  }
+
+  .leaflet-control-attribution {
+    font-size: 10px;
+    color: #bbb;
+    background: transparent !important;
+  }
+
+  .leaflet-control-attribution a { color: #bbb; }
+
+  .home-marker { background: none !important; border: none !important; }
+
+  /* Section layout */
+  .section {
+    margin-bottom: 52px;
+  }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #1c1c1c;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+
+  .hl {
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    padding: 2px 7px;
+    display: inline-block;
+  }
+
+  .section--why .hl    { background: #fde68a; }
+  .section--stuck .hl  { background: #a7f3d0; }
+  .section--home .hl   { background: #bfdbfe; }
+  .section--next .hl   { background: #e9d5ff; }
+
+  /* Prose */
+  p {
+    font-size: 16px;
+    line-height: 1.8;
+    color: #2a2a2a;
+    margin-bottom: 22px;
+  }
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Place subheadings */
+  .place-heading {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #bbb;
+    margin-bottom: 8px;
+    margin-top: 32px;
+  }
+
+  .place-heading:first-child {
+    margin-top: 0;
+  }
+
+  /* Galveston polaroid joke */
+  .polaroid {
+    display: block;
+    width: fit-content;
+    background: #fff;
+    padding: 8px 8px 22px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.12);
+    transform: rotate(-2.5deg);
+    margin: 8px 0 28px;
+  }
+
+  .polaroid-photo {
+    width: 200px;
+    height: 100px;
+    background: linear-gradient(180deg, #b8c9cc 0%, #7e9e8a 40%, #c4b08a 100%);
+  }
+
+  .polaroid-caption {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 13px;
+    text-align: center;
+    padding-top: 10px;
+    color: #444;
+  }
+
+  /* Recommendations footer note */
+  .rec-note {
+    font-size: 14px;
+    color: #888;
+    margin-top: 20px;
+  }
+
+  .rec-note a {
+    color: #1c1c1c;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .rec-note a:hover { color: #888; }
+
+  /* Side-by-side photo comparison */
+  .photo-compare {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin: 8px 0 32px;
+    flex-wrap: wrap;
+  }
+
+  .polaroid-real {
+    display: block;
+    width: fit-content;
+    background: #fff;
+    padding: 8px 8px 22px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.12);
+    transform: rotate(1.5deg);
+  }
+
+  .polaroid-real img {
+    width: 200px;
+    height: 120px;
+    display: block;
+    object-fit: cover;
+    cursor: pointer;
+  }
+
+  /* Photo tags */
+  .photo-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 16px;
+  }
+
+  .photo-tag {
+    display: inline-block;
+    padding: 3px 9px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid #e8e5e0;
+    border-radius: 2px;
+    cursor: pointer;
+    color: #888;
+    background: none;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .photo-tag:hover { border-color: #1c1c1c; color: #1c1c1c; }
+  .photo-tag.no-photo { opacity: 0.38; cursor: default; pointer-events: none; }
+
+  /* Lightbox */
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.88);
+    z-index: 9999;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .lightbox.open { display: flex; }
+
+  .lightbox-inner {
+    max-width: min(90vw, 700px);
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .lightbox-inner img {
+    max-width: 100%;
+    max-height: 80vh;
+    display: block;
+    border-radius: 2px;
+    margin: 0 auto;
+  }
+
+  .lightbox-caption {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #666;
+    margin-top: 12px;
+  }
+
+  /* Map legend */
+  .map-legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+    margin-bottom: 48px;
+    flex-wrap: wrap;
+  }
+
+  .map-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #bbb;
+  }
+
+  .map-legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Rule */
+  hr {
+    border: none;
+    border-top: 1px solid #e8e5e0;
+    margin: 56px 0;
+  }
+
+  /* Footer link */
+  .footer-link {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: #888;
+    text-decoration: none;
+    letter-spacing: 0.03em;
+  }
+
+  .footer-link:hover {
+    color: #1c1c1c;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="nav">
+    <a href="../../">← cedric turner ii</a>
+  </nav>
+
+  <div class="hero">
+    <h1>where i've been</h1>
+    <p class="subtitle">and what I took from it</p>
+  </div>
+
+  <div class="map-wrap">
+    <div id="world-map"></div>
+  </div>
+
+  <div class="map-legend">
+    <div class="map-legend-item"><span class="map-legend-dot" style="background:#93c5fd"></span>once</div>
+    <div class="map-legend-item"><span class="map-legend-dot" style="background:#c084fc"></span>twice</div>
+    <div class="map-legend-item"><span class="map-legend-dot" style="background:#fb923c"></span>several times</div>
+    <div class="map-legend-item"><span class="map-legend-dot" style="background:#ef4444"></span>frequently</div>
+    <div class="map-legend-item"><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 20 20" style="flex-shrink:0"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h4v-4h2v4h4a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" fill="#1c1c1c"/></svg>home</div>
+  </div>
+
+  <!-- Why I travel -->
+  <section class="section section--why">
+    <div class="section-label"><span class="hl">Why I travel</span></div>
+
+    <p>It's not really about sightseeing. The sites are cool, but that's not the part that stays with you. What actually matters is seeing how people live, what their day looks like, what they take for granted that would completely change how you move through the world if you'd grown up with it.</p>
+
+    <p>I grew up in Texas, which means I grew up driving everywhere. At sixteen, learning to drive wasn't some milestone you earned — it was just what teenagers did. My family is in Houston. There's space out there. Homes are big, land is cheap. I grew up in a house in the suburbs where a 15-minute drive was considered right around the corner. People would say "it's right up the street" and mean something that required getting in a car, and nobody thought that was strange. The beach was Galveston — and if you know Galveston, you know.</p>
+
+    <p>Then I went to Japan. I walked everywhere, took trains everywhere. There were hills, mountains, lakes, things I just didn't grow up around.</p>
+
+    <div class="photo-compare">
+      <div class="polaroid-real" style="transform: rotate(-2.5deg);">
+        <img src="galveston.jpg" alt="Galveston Beach" onclick="openLb('galveston.jpg','Galveston Beach')">
+        <div class="polaroid-caption">Galveston Beach ↑</div>
+      </div>
+      <div class="polaroid-real">
+        <img src="japan-photo.jpg" alt="Mount Fuji from Lake Ashi, Hakone" onclick="openLb('japan-photo.jpg','Hakone · Lake Ashi')">
+        <div class="polaroid-caption">Hakone ↑</div>
+      </div>
+    </div>
+
+    <p>But the deeper thing wasn't the scenery. It was that the people there are used to all of it. The trains, the density, the walkability — that's just Tuesday for them. On my second trip I asked my tour guide where her favorite place she'd ever traveled was. She said somewhere in the US, Yellowstone or maybe Colorado, said it was the most beautiful nature she'd ever seen. I just sat with that for a second. Because the whole time I'm in Japan I'm thinking: why would anyone ever want to leave. And she's thinking the same thing about where I'm from.</p>
+
+    <p>It's not surprising when you really think about it, but you don't realize it until you're sitting across from someone who proves it. Everyone treats their own country like the default and everywhere else like the interesting part. You just don't figure that out until you go somewhere and find someone thinking the exact same thing about you.</p>
+
+    <p>I used to think I wanted to move abroad. Japan especially made that case pretty convincingly. But what I've figured out is that's not actually what I want. What I like is the newness of it — seeing how things work somewhere different, adapting to it, living a different way for a little while. I still want to leave the US at some point, but I can't figure out where I'd actually settle. That's kind of the problem with traveling enough: too many places are genuinely good.</p>
+
+    <p>It's true within the US too. The South has its own thing. People talk a certain way, joke a certain way, move a certain way. The West Coast is different. The East Coast, people are kind of mean in a way that takes some getting used to. Different logic everywhere, and you have to adapt wherever you land.</p>
+
+    <p>The part I love most is the human connection. When you don't speak the same language and you're both still managing to be kind to each other, finding the laughs that come out of not understanding what either person is saying — that's the part I keep coming back for.</p>
+  </section>
+
+  <!-- The places that stuck -->
+  <section class="section section--stuck">
+    <div class="section-label"><span class="hl">The places that stuck</span></div>
+
+    <div class="place-heading">Japan</div>
+    <p>I've been twice and I'm going back in May 2026. There's an obvious reason everyone is drawn to Japan — the anime, the food, the aesthetic. People are interested before they even go. But what actually hits you when you're there is how functional it is. You can walk anywhere, the trains run on time, and the signage works even if you don't read a single character of Japanese. It's like New York in the sense that everything is at your fingertips, except it's clean and there's no part of the city where the convenience just drops off. The gap between the best version of something and the everyday version of it is unusually small. And then there's the nature. Hakone, the views around Mount Fuji, the way the countryside looks between cities. Most places are either highly organized or genuinely beautiful. Japan is both at once, which feels almost unfair.</p>
+
+    <div class="photo-tags">
+      <button class="photo-tag" onclick="openLb('japan-photo.jpg','Hakone · Lake Ashi')">Hakone</button>
+      <button class="photo-tag" onclick="openLb('photos/japan-IMG_6800.jpg','Tokyo')">Tokyo</button>
+      <button class="photo-tag" onclick="openLb('photos/japan-IMG_0832.jpg','Kyoto')">Kyoto</button>
+      <button class="photo-tag" onclick="openLb('photos/japan-IMG_6945.jpg','Osaka Castle')">Osaka</button>
+      <button class="photo-tag no-photo">Hiroshima</button>
+    </div>
+
+    <div class="place-heading">Australia and New Zealand</div>
+    <p>I went when I was 12, on a student ambassador trip. My parents weren't there, which in hindsight was pretty wild. A group of kids I mostly didn't know, chaperoned through Sydney, the Great Barrier Reef, and Auckland. Australia felt like a better version of the West Coast — familiar enough to be comfortable but noticeably different in a way I couldn't fully articulate at that age. I'm still in touch with some of those people today.</p>
+
+    <p>Honestly, I'd been traveling before that too. My parents took me to the Bahamas when I was really young, and I'd been to Cozumel on cruises. By the time I was on a plane to Australia I'd already spent enough time around people from different places to know what it felt like to not understand what was being said and still feel welcomed. So when I got to Australia at 12 with a bunch of strangers and no parents, I at least knew what it felt like to just figure it out with people.</p>
+
+    <div class="place-heading">Europe</div>
+    <p>Amsterdam, Paris, London, Zurich, Strasbourg. What hits you in European cities is that they weren't built around cars. You walk to things. Streets have people in them at all hours. There's a scale to everything that makes you feel like you're inside a city rather than just passing through it. American cities, especially in the South, often feel like they were designed for you to leave as fast as possible. European cities feel like the opposite assumption was made.</p>
+
+    <p>That said, I didn't love Zurich. I went in December and it was expensive in a way I wasn't prepared for — I could barely afford to eat without it being a whole thing. The views were fine, it was gloomy the whole time, I get why some people love it, but I just didn't see it. Amsterdam was a completely different experience. I could have stayed longer. Strasbourg was a quick stop — it sits right on the French-German border and looks almost nothing like Paris. More Germanic architecture, canals everywhere. Worth going. The thing is, a bad experience still teaches you something. You find out what you actually respond to by going somewhere and having a real reaction to it, not a curated one.</p>
+
+    <div class="photo-tags">
+      <button class="photo-tag no-photo">Amsterdam</button>
+      <button class="photo-tag no-photo">Paris</button>
+      <button class="photo-tag no-photo">London</button>
+      <button class="photo-tag no-photo">Zurich</button>
+      <button class="photo-tag" onclick="openLb('photos/france-1.jpg','Strasbourg · Cathédrale Notre-Dame')">Strasbourg</button>
+    </div>
+
+    <div class="place-heading">Seoul</div>
+    <p>I went to Seoul with a coworker, Minjae, who grew up in South Korea. That made the whole experience different. Having someone who actually grew up there, who knew which places were for tourists and which weren't, changed every decision. It's one of those things where you realize a guide who loves where they're from is a completely different thing than any other kind of guide.</p>
+
+    <p>If the US and Japan were opposite ends of a spectrum, Seoul sits about 75% of the way toward Japan. It has a lot of the same energy as Tokyo but without the quiet politeness baked into everything. People are louder, more excited, more likely to just be visibly having fun. The closest comparison I can make is Tokyo if it leaned a little more toward New York — people outside, at the club, enjoying themselves in a way that feels openly American but in an Asian city. I liked the people of Seoul more than anywhere else I've been.</p>
+
+    <p>Japan wins on the convenience side, though. In Seoul I had to figure out the T-card, pull out cash all the time, and download Kakao Maps because Google barely works there. In Japan I loaded Suica onto my Apple Wallet and used Google Maps the whole trip. That gap in friction is small but it adds up across a week.</p>
+
+    <div class="photo-tags">
+      <button class="photo-tag" onclick="openLb('photos/seoul-IMG_7658.jpg','Seoul')">Seoul</button>
+    </div>
+
+    <div class="place-heading">Mexico, the Dominican Republic, Cozumel</div>
+    <p>Tulum, Cancun, Cabo, the Dominican Republic, Cozumel on cruises — those all-inclusive trips are all kind of the same experience. Fun, relaxing, good for about two or three days before you've seen enough of the pool and the swim-up bar. What I actually take from those trips is the rest. Cabo is a resort that happens to be in Mexico. Tulum has more going on if you get outside the hotel zone, but you have to want to find it. The Dominican Republic and Cozumel are similar. None of them show you the real version of where you are, but you get the sun and the water and the feeling of being somewhere warm with nothing you have to do. You come back more rested than you left, which isn't nothing.</p>
+  </section>
+
+  <!-- Close to home -->
+  <section class="section section--home">
+    <div class="section-label"><span class="hl">Close to home</span></div>
+
+    <p>North America has more range than people give it credit for. Banff is genuinely stunning in a way that feels almost unfair. You drive through the Rockies and think: this is free. Hawaii is its own thing entirely, the kind of place that doesn't fit neatly into any category. The Pacific Coast from Vancouver down through Seattle, Portland, and San Francisco is one of the better drives on the continent.</p>
+
+    <p>Then there's Houston. Dallas. The flat middle of the country where everything is big and spread out and the culture runs on completely different logic than the coasts. I grew up around some of that, and I'm glad I can still read it. Canada is underrated across the board. Montrealers have figured out something about how to have a good time in a cold city that most people haven't cracked.</p>
+  </section>
+
+  <!-- Up next -->
+  <section class="section section--next">
+    <div class="section-label"><span class="hl">Up next</span></div>
+
+    <p>Japan again, May 2026. Third trip. This one goes wider: more time in Kyoto, a few days in Hiroshima, and a longer stretch outside the cities. I have an <a href="./japan/" style="color: #1c1c1c;">itinerary</a> mapped out. Japan is one of those places that rewards return trips because you spend the first one just orienting.</p>
+  </section>
+
+  <hr>
+
+  <a class="footer-link" href="./japan/">→ Japan itinerary (May 2026)</a>
+
+  <p class="rec-note">have recommendations? places i should go, restaurants i shouldn't miss, things worth doing? <a href="mailto:cedricbturner@gmail.com">send them through!</a></p>
+
+</div>
+
+<div id="lb" class="lightbox" onclick="closeLb()">
+  <div class="lightbox-inner">
+    <img id="lb-img" src="" alt="">
+    <div id="lb-cap" class="lightbox-caption"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+function openLb(src, cap) {
+  document.getElementById('lb-img').src = src;
+  document.getElementById('lb-cap').textContent = cap;
+  document.getElementById('lb').classList.add('open');
+}
+function closeLb() {
+  document.getElementById('lb').classList.remove('open');
+}
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLb(); });
+
+(function () {
+  const map = L.map('world-map', {
+    center: [20, 10],
+    zoom: 2,
+    zoomSnap: 0.5,
+    scrollWheelZoom: false,
+    minZoom: 1,
+    maxZoom: 12,
+    worldCopyJump: true
+  });
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 19
+  }).addTo(map);
+
+  // freq: 1=once(blue) 2=twice(purple) 3=several(orange) 4=frequent(red)
+  const COLORS = { 1: '#93c5fd', 2: '#c084fc', 3: '#fb923c', 4: '#ef4444' };
+
+  const places = [
+    // Japan (3 trips)
+    { name: 'Tokyo',             lat: 35.6762,  lng: 139.6503, freq: 3 },
+    { name: 'Kyoto',             lat: 35.0116,  lng: 135.7681, freq: 3 },
+    { name: 'Osaka',             lat: 34.6937,  lng: 135.5023, freq: 3 },
+    { name: 'Hakone',            lat: 35.2323,  lng: 139.0236, freq: 2 },
+    { name: 'Hiroshima',         lat: 34.3853,  lng: 132.4553, freq: 2 },
+    // Korea
+    { name: 'Seoul',             lat: 37.5665,  lng: 126.9780, freq: 1 },
+    // Europe
+    { name: 'Zurich',            lat: 47.3769,  lng:   8.5417, freq: 1 },
+    { name: 'Strasbourg',        lat: 48.5734,  lng:   7.7521, freq: 1 },
+    { name: 'Amsterdam',         lat: 52.3676,  lng:   4.9041, freq: 2 },
+    { name: 'Paris',             lat: 48.8566,  lng:   2.3522, freq: 1 },
+    { name: 'London',            lat: 51.5074,  lng:  -0.1278, freq: 1 },
+    // Mexico / Caribbean
+    { name: 'Tulum',             lat: 20.2114,  lng: -87.4653, freq: 1 },
+    { name: 'Cancun',            lat: 21.1619,  lng: -86.8515, freq: 1 },
+    { name: 'Cabo San Lucas',    lat: 22.8905,  lng:-109.9167, freq: 1 },
+    { name: 'Cozumel',           lat: 20.5101,  lng: -86.9480, freq: 1 },
+    { name: 'Nassau',            lat: 25.0480,  lng: -77.3554, freq: 1 },
+    { name: 'Santo Domingo',     lat: 18.4861,  lng: -69.9312, freq: 1 },
+    // Pacific / Oceania
+    { name: 'Sydney',            lat:-33.8688,  lng: 151.2093, freq: 1 },
+    { name: 'Great Barrier Reef',lat:-18.2871,  lng: 147.6992, freq: 1 },
+    { name: 'Auckland',          lat:-36.8485,  lng: 174.7633, freq: 1 },
+    { name: 'Honolulu',          lat: 21.3069,  lng:-157.8583, freq: 1 },
+    // Canada
+    { name: 'Toronto',           lat: 43.6532,  lng: -79.3832, freq: 1 },
+    { name: 'Montreal',          lat: 45.5017,  lng: -73.5673, freq: 1 },
+    { name: 'Banff / Calgary',   lat: 51.1784,  lng:-115.5708, freq: 1 },
+    { name: 'Vancouver',         lat: 49.2827,  lng:-123.1207, freq: 1 },
+    // US West
+    { name: 'Seattle',           lat: 47.6062,  lng:-122.3321, freq: 1 },
+    { name: 'San Francisco',     lat: 37.7749,  lng:-122.4194, freq: 1 },
+    { name: 'Los Angeles',       lat: 34.0522,  lng:-118.2437, freq: 1 },
+    { name: 'Las Vegas',         lat: 36.1699,  lng:-115.1398, freq: 4 },
+    { name: 'Phoenix',           lat: 33.4484,  lng:-112.0740, freq: 1 },
+    { name: 'Salt Lake City',    lat: 40.7608,  lng:-111.8910, freq: 1 },
+    { name: 'Vernal, UT',        lat: 40.4555,  lng:-109.5287, freq: 1 },
+    { name: 'Albuquerque',       lat: 35.0844,  lng:-106.6504, freq: 1 },
+    // Oregon
+    { name: 'Portland',          lat: 45.5051,  lng:-122.6750, freq: 3 },
+    { name: 'Medford',           lat: 42.3265,  lng:-122.8756, freq: 3 },
+    // US Midwest
+    { name: 'Chicago',           lat: 41.8781,  lng: -87.6298, freq: 1 },
+    { name: 'Columbus, OH',      lat: 39.9612,  lng: -82.9988, freq: 1 },
+    { name: 'Cincinnati',        lat: 39.1031,  lng: -84.5120, freq: 1 },
+    // US East
+    { name: 'New York',          lat: 40.7128,  lng: -74.0060, freq: 2 },
+    { name: 'Washington, D.C.',  lat: 38.9072,  lng: -77.0369, freq: 1 },
+    { name: 'Boston',            lat: 42.3601,  lng: -71.0589, freq: 1 },
+    // US South
+    { name: 'Dallas',            lat: 32.7767,  lng: -96.7970, freq: 3 },
+    { name: 'Orlando',           lat: 28.5383,  lng: -81.3792, freq: 3 },
+    { name: 'Pine Bluff, AR',    lat: 34.2284,  lng: -92.0032, freq: 1 },
+    { name: 'Baton Rouge',       lat: 30.4515,  lng: -91.1871, freq: 1 },
+    { name: 'Jackson, MS',       lat: 32.2988,  lng: -90.1848, freq: 1 },
+    { name: 'Montgomery, AL',    lat: 32.3668,  lng: -86.2999, freq: 1 },
+    { name: 'Huntsville, AL',    lat: 34.7304,  lng: -86.5861, freq: 1 },
+  ];
+
+  const homes = [
+    { name: 'Austin (home)',           lat: 30.2672, lng: -97.7431 },
+    { name: 'Houston (grew up here)',  lat: 29.7604, lng: -95.3698 },
+  ];
+
+  const baseStyle = { radius: 5, color: '#fafaf9', weight: 1.5, opacity: 1, fillOpacity: 1 };
+
+  places.forEach(c => {
+    L.circleMarker([c.lat, c.lng], { ...baseStyle, fillColor: COLORS[c.freq] })
+      .bindTooltip(c.name, { direction: 'top', offset: [0, -6] })
+      .addTo(map);
+  });
+
+  const homeSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h4v-4h2v4h4a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" fill="#1c1c1c"/></svg>';
+
+  homes.forEach(h => {
+    const icon = L.divIcon({ className: 'home-marker', html: homeSvg, iconSize: [18, 18], iconAnchor: [9, 18], tooltipAnchor: [0, -20] });
+    L.marker([h.lat, h.lng], { icon })
+      .bindTooltip(h.name, { direction: 'top' })
+      .addTo(map);
+  });
+}());
+</script>
+</body>
+</html>
