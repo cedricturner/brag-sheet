@@ -455,7 +455,7 @@
       <span class="photos-label">photos! →</span>
       <div class="photo-tags">
         <button class="photo-tag" onclick="openGallery('amsterdam',0)">Amsterdam</button>
-        <button class="photo-tag no-photo">Paris</button>
+        <button class="photo-tag" onclick="openGallery('paris',0)">Paris</button>
         <button class="photo-tag" onclick="openGallery('london',0)">London</button>
         <button class="photo-tag" onclick="openGallery('zurich',0)">Zurich</button>
         <button class="photo-tag" onclick="openGallery('strasbourg',0)">Strasbourg</button>
@@ -531,11 +531,23 @@ const galleries = {
   himeji:     [['photos/japan-IMG_6945.jpg','Himeji Castle']],
   hiroshima:  [['photos/japan-IMG_0832.jpg','Miyajima · Hiroshima']],
   seoul:      [['photos/seoul-IMG_7658.jpg','Seoul'],['photos/seoul-IMG_7723.jpg','Seoul'],['photos/seoul-IMG_7727.jpg','Seoul · Subway']],
-  strasbourg: [['photos/france-1.jpg','Strasbourg · Cathédrale Notre-Dame'],['photos/france-2.jpg','Strasbourg'],['photos/france-3.jpg','Strasbourg'],['photos/france-4.jpg','Strasbourg']],
+  strasbourg: [['photos/france-1.jpg','Strasbourg · Cathédrale Notre-Dame',-90]],
+  paris:      [['photos/france-3.jpg','Paris'],['photos/france-4.jpg','Paris']],
   amsterdam:  [['photos/amsterdam-IMG_7059.jpg','Amsterdam'],['photos/amsterdam-IMG_7068.jpg','Amsterdam'],['photos/amsterdam-IMG_7072.jpg','Amsterdam'],['photos/amsterdam-IMG_9679.jpg','Amsterdam']],
   london:     [['photos/london-IMG_9812.jpg','London'],['photos/london-IMG_9822.jpg','London'],['photos/london-IMG_9838.jpg','London']],
   zurich:     [['photos/zurich-IMG_7033.jpg','Zurich'],['photos/zurich-IMG_7034.jpg','Zurich']],
 };
+
+// Build one continuous flat array so navigation flows across locations
+const galleryOrder = ['hakone','tokyo','kyoto','osaka','himeji','hiroshima','seoul','strasbourg','paris','amsterdam','london','zurich'];
+const galleryStartIndex = {};
+const allPhotos = [];
+galleryOrder.forEach(key => {
+  if (galleries[key]) {
+    galleryStartIndex[key] = allPhotos.length;
+    galleries[key].forEach(p => allPhotos.push(p));
+  }
+});
 
 // Annotate photo tag buttons with count badge when multiple photos exist
 document.querySelectorAll('.photo-tag[onclick]').forEach(btn => {
@@ -549,8 +561,8 @@ let currentGallery = [];
 let currentIndex = 0;
 
 function openGallery(key, idx) {
-  currentGallery = galleries[key] || [];
-  currentIndex = idx || 0;
+  currentGallery = allPhotos;
+  currentIndex = galleryStartIndex[key] + (idx || 0);
   showLbFrame();
   document.getElementById('lb').classList.add('open');
 }
