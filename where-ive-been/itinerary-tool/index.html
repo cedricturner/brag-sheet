@@ -90,6 +90,15 @@ a { color: inherit; text-decoration: none; }
   text-transform: uppercase;
   color: var(--muted);
   margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.trip-name-pencil {
+  width: 10px;
+  height: 10px;
+  opacity: 0.5;
+  flex-shrink: 0;
 }
 
 .airport-date-row {
@@ -122,6 +131,12 @@ a { color: inherit; text-decoration: none; }
   line-height: 1;
   will-change: transform, opacity;
   transition: none;
+  border-bottom: 2px dashed var(--muted);
+  padding-bottom: 2px;
+}
+.airport-hero:hover .airport-hero-code {
+  border-bottom-color: var(--purple);
+  color: var(--purple);
 }
 
 .airport-hero-swap {
@@ -1066,7 +1081,7 @@ a { color: inherit; text-decoration: none; }
     <div class="header-top">
       <!-- Airport hero — click to edit -->
       <div class="airport-hero" onclick="openTripConfig()" title="Edit trip details">
-        <div class="trip-name-display" id="tripNameDisplay">My Trip</div>
+        <div class="trip-name-display" id="tripNameDisplay">My Trip<svg class="trip-name-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
         <div class="airport-date-row">
           <span class="airport-date" id="headerDepDate">05/19</span>
           <span class="airport-date" id="headerArrDate">05/30</span>
@@ -2366,7 +2381,7 @@ function applyTripConfig() {
   document.getElementById('headerFromCity').textContent = tripConfig.fromCity || '';
   document.getElementById('headerToCity').textContent = tripConfig.toCity || '';
   const nameEl = document.getElementById('tripNameDisplay');
-  if (nameEl) nameEl.textContent = itinerary.tripName || tripConfig.toCity || 'My Trip';
+  if (nameEl) nameEl.textContent = (itinerary && itinerary.tripName) || tripConfig.toCity || 'My Trip';
 
   // Format dates as MM/DD
   function fmtShort(dateStr) {
@@ -2467,8 +2482,8 @@ function saveTripConfig() {
 // =============================================
 // BOOT
 // =============================================
-loadTripConfig();
 init();
+loadTripConfig();
 
 // =============================================
 // AIRPORT AUTOCOMPLETE
@@ -2786,6 +2801,24 @@ const AIRPORTS = [
   {c:'NAN',city:'Nadi',name:'Nadi Intl',country:'FJ'},
   {c:'PPT',city:'Papeete',name:'Faa\'a Intl',country:'PF'},
 ];
+
+// Pick a random trip if no saved config
+(function maybeRandomizeTrip() {
+  if (localStorage.getItem('itinerary-trip-config')) return;
+  const interesting = AIRPORTS.filter(a => !['US'].includes(a.country));
+  const domestic = AIRPORTS.filter(a => a.country === 'US');
+  const from = domestic[Math.floor(Math.random() * domestic.length)];
+  const to = interesting[Math.floor(Math.random() * interesting.length)];
+  tripConfig = {
+    fromCode: from.c,
+    fromCity: from.city,
+    toCode: to.c,
+    toCity: to.city,
+    depDate: tripConfig.depDate,
+    retDate: tripConfig.retDate,
+  };
+  applyTripConfig();
+}());
 
 let acFocusIndex = { from: -1, to: -1 };
 let acResults = { from: [], to: [] };
