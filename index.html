@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cedric Turner II</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@700&family=Abril+Fatface&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@700&family=Abril+Fatface&family=Permanent+Marker&family=Caveat:wght@600&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -56,6 +56,9 @@
     padding: 2px 7px;
     display: inline-block;
   }
+
+  .section--me .section-label { font-family: 'Caveat', cursive; font-weight: 600; text-transform: none; letter-spacing: 0; font-size: 19px; color: #1a1a1a; }
+  .section--me .section-label .hl { background: #fef08a; transform: rotate(-1.5deg); }
 
   .section--writing .section-label { font-family: 'Permanent Marker', cursive; font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 15px; color: #1a1a1a; }
   .section--writing .section-label .hl { background: #e9d5ff; transform: rotate(-2deg); }
@@ -128,8 +131,8 @@
     <p>curious!</p>
   </header>
 
-  <section class="section--writing">
-    <div class="section-label"><span class="hl">Writing</span></div>
+  <section class="section--me">
+    <div class="section-label"><span class="hl">me</span></div>
     <ul>
       <li>
         <a class="item" href="./blog/27/">
@@ -138,15 +141,21 @@
         </a>
       </li>
       <li>
-        <a class="item" href="./blog/ai-forces-preference/">
-          <div class="item-title">ai forces preference</div>
-          <div class="item-meta">April 2026 &nbsp;·&nbsp; AI doesn't give you answers. It forces you to know what you want.</div>
-        </a>
-      </li>
-      <li>
         <a class="item" href="./travel/">
           <div class="item-title">where i've been</div>
           <div class="item-meta">Travel writing, map, and photos from Japan, Seoul, Europe, and more</div>
+        </a>
+      </li>
+    </ul>
+  </section>
+
+  <section class="section--writing">
+    <div class="section-label"><span class="hl">Writing</span></div>
+    <ul>
+      <li>
+        <a class="item" href="./blog/ai-forces-preference/">
+          <div class="item-title">ai forces preference</div>
+          <div class="item-meta">April 2026 &nbsp;·&nbsp; AI doesn't give you answers. It forces you to know what you want.</div>
         </a>
       </li>
     </ul>
