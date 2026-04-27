@@ -1782,10 +1782,21 @@ function parseImport() {
   const importBtn = document.getElementById('importBtn');
 
   if (parsed && parsed.days && parsed.days.length > 0) {
+    // Drop empty days, then assign dates from startDate
+    parsed.days = parsed.days.filter(d => d.activities.length > 0);
+    const start = itinerary.startDate ? new Date(itinerary.startDate + 'T00:00:00') : null;
+    parsed.days.forEach((d, i) => {
+      if (!d.date && start) {
+        const dt = new Date(start);
+        dt.setDate(dt.getDate() + i);
+        d.date = dt.toISOString().split('T')[0];
+      }
+      d.label = 'Day ' + (i + 1);
+    });
     parsedImportData = parsed;
     let html = `<strong>Found ${parsed.days.length} day(s):</strong><br>`;
     parsed.days.forEach(d => {
-      html += `• ${d.label || d.title}: ${d.activities.length} activit${d.activities.length !== 1 ? 'ies' : 'y'}<br>`;
+      html += `• ${d.label}: ${d.date || ''} — ${d.activities.length} activit${d.activities.length !== 1 ? 'ies' : 'y'}<br>`;
     });
     preview.innerHTML = html;
     preview.style.display = 'block';
@@ -1841,14 +1852,9 @@ function parseTextItinerary(text) {
       return;
     }
 
-    if (!currentDay) {
-      currentDay = { id: 'd' + Date.now(), label: 'Day 1', date: '', title: 'Imported', activities: [] };
-      days.push(currentDay);
-    }
-
     // Activity: "- Name (category) [time] [cost]"
     const actMatch = trimmed.match(/^[-*•]\s*(.+)/);
-    if (actMatch) {
+    if (actMatch && currentDay) {
       const content = actMatch[1];
       const timeMatch = content.match(/(\d{1,2}:\d{2}\s*(?:AM|PM)?)/i);
       const costMatch = content.match(/(¥[\d,]+|\$[\d,.]+|USD?\s*[\d,.]+)/i);
@@ -1887,8 +1893,8 @@ function inferCategories(text) {
 
 function doImport() {
   if (!parsedImportData) return;
-  if (!confirm(`Import ${parsedImportData.days.length} day(s)? This will ADD to your current itinerary.`)) return;
-  parsedImportData.days.forEach(d => itinerary.days.push(d));
+  if (!confirm(`Import ${parsedImportData.days.length} day(s)? This will replace your current itinerary.`)) return;
+  itinerary.days = parsedImportData.days;
   save();
   render();
   document.getElementById('importText').value = '';
