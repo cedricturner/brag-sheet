@@ -287,30 +287,38 @@
     margin-top: 12px;
   }
 
-  .lb-counter {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: #444;
-    margin-top: 6px;
-    letter-spacing: 0.06em;
-  }
-
   .lb-arrow {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: none;
+    background: rgba(255,255,255,0.12);
     border: none;
-    color: rgba(255,255,255,0.45);
-    font-size: 32px;
-    padding: 12px 16px;
+    color: rgba(255,255,255,0.8);
+    font-size: 28px;
+    padding: 16px 20px;
     cursor: pointer;
     line-height: 1;
     display: none;
+    border-radius: 4px;
+    transition: background 0.15s, color 0.15s;
   }
-  .lb-arrow:hover { color: rgba(255,255,255,0.85); }
-  .lb-prev { left: 8px; }
-  .lb-next { right: 8px; }
+  .lb-arrow:hover { background: rgba(255,255,255,0.22); color: #fff; }
+  .lb-prev { left: 12px; }
+  .lb-next { right: 12px; }
+
+  .lb-counter {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.55);
+    margin-top: 8px;
+    letter-spacing: 0.08em;
+  }
+
+  .photo-tag[data-count]::after {
+    content: ' · ' attr(data-count);
+    color: #ccc;
+    font-size: 9px;
+  }
 
   /* Map legend */
   .map-legend {
@@ -446,10 +454,10 @@
     <div class="photo-tags-row">
       <span class="photos-label">photos! →</span>
       <div class="photo-tags">
-        <button class="photo-tag no-photo">Amsterdam</button>
+        <button class="photo-tag" onclick="openGallery('amsterdam',0)">Amsterdam</button>
         <button class="photo-tag no-photo">Paris</button>
-        <button class="photo-tag no-photo">London</button>
-        <button class="photo-tag no-photo">Zurich</button>
+        <button class="photo-tag" onclick="openGallery('london',0)">London</button>
+        <button class="photo-tag" onclick="openGallery('zurich',0)">Zurich</button>
         <button class="photo-tag" onclick="openGallery('strasbourg',0)">Strasbourg</button>
       </div>
     </div>
@@ -476,9 +484,11 @@
   <section class="section section--home">
     <div class="section-label"><span class="hl">Close to home</span></div>
 
-    <p>North America has more range than people give it credit for. Banff is genuinely stunning in a way that feels almost unfair. You drive through the Rockies and think: this is free. Hawaii is its own thing entirely, the kind of place that doesn't fit neatly into any category. The Pacific Coast from Vancouver down through Seattle, Portland, and San Francisco is one of the better drives on the continent.</p>
+    <p>The thing people underestimate about the US is how different it actually is depending on where you are. It's big enough to be multiple countries. You go to New York and people have transit, they walk, they don't think twice about it. You go to the West Coast and people are hiking on the weekends and composting their food. The South is its own thing entirely — historically, culturally, the humor, the food, the way people interact with each other. People are warmer in a genuine way down there. Southern hospitality isn't a marketing slogan. There's a realness to how people show up for each other that you don't always get in places that have the reputation for being more progressive.</p>
 
-    <p>Then there's Houston. Dallas. The flat middle of the country where everything is big and spread out and the culture runs on completely different logic than the coasts. I grew up around some of that, and I'm glad I can still read it. Canada is underrated across the board. Montrealers have figured out something about how to have a good time in a cold city that most people haven't cracked.</p>
+    <p>The South is also complicated. There's history there that's hard to look at, and a lot of things people are still working through — or refusing to work through. It's not simple. But neither is anywhere else in this country, honestly. The coasts have their own blind spots.</p>
+
+    <p>The food alone makes the US worth visiting. Texas BBQ is a different experience than Memphis BBQ which is a different experience than Carolina BBQ and none of them are the same thing. Cajun food in Louisiana is its own world. The further into the country you go, the more specific things get. That's actually true of the scenery too. Hawaii is genuinely unlike anything I've seen anywhere else. There are parts of this country that are extraordinary, you just have to be willing to go find them instead of assuming you already know what's there.</p>
   </section>
 
   <!-- Up next -->
@@ -514,15 +524,26 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const galleries = {
-  hakone:     [['japan-photo.jpg','Hakone · Lake Ashi'],['photos/japan-IMG_6847.jpg','Hakone · Lake',-90]],
-  tokyo:      [['photos/japan-IMG_6800.jpg','Tokyo'],['photos/japan-IMG_0408.jpg','Tokyo',-90],['photos/japan-IMG_0468.jpg','Tokyo',-90]],
-  kyoto:      [['photos/japan-IMG_0647.jpg','Kyoto'],['photos/japan-IMG_6888.jpg','Kyoto']],
-  osaka:      [['photos/japan-IMG_6976.jpg','Osaka',-90],['photos/japan-IMG_6977.jpg','Osaka',-90]],
+  hakone:     [['japan-photo.jpg','Hakone · Lake Ashi'],['photos/japan-IMG_6847.jpg','Hakone · Lake']],
+  tokyo:      [['photos/japan-IMG_6800.jpg','Tokyo'],['photos/japan-IMG_0408.jpg','Tokyo'],['photos/japan-IMG_0468.jpg','Tokyo']],
+  kyoto:      [['photos/japan-IMG_0647.jpg','Kyoto'],['photos/japan-IMG_0608-2.jpg','Kyoto'],['photos/japan-IMG_6888.jpg','Kyoto']],
+  osaka:      [['photos/japan-IMG_6976.jpg','Osaka'],['photos/japan-IMG_6977.jpg','Osaka']],
   himeji:     [['photos/japan-IMG_6945.jpg','Himeji Castle']],
-  hiroshima:  [['photos/japan-IMG_0832.jpg','Miyajima · Hiroshima',-90]],
-  seoul:      [['photos/seoul-IMG_7658.jpg','Seoul',-90],['photos/seoul-IMG_7723.jpg','Seoul'],['photos/seoul-IMG_7727.jpg','Seoul · Subway',-90]],
-  strasbourg: [['photos/france-1.jpg','Strasbourg · Cathédrale Notre-Dame',-90]],
+  hiroshima:  [['photos/japan-IMG_0832.jpg','Miyajima · Hiroshima']],
+  seoul:      [['photos/seoul-IMG_7658.jpg','Seoul'],['photos/seoul-IMG_7723.jpg','Seoul'],['photos/seoul-IMG_7727.jpg','Seoul · Subway']],
+  strasbourg: [['photos/france-1.jpg','Strasbourg · Cathédrale Notre-Dame'],['photos/france-2.jpg','Strasbourg'],['photos/france-3.jpg','Strasbourg'],['photos/france-4.jpg','Strasbourg']],
+  amsterdam:  [['photos/amsterdam-IMG_7059.jpg','Amsterdam'],['photos/amsterdam-IMG_7068.jpg','Amsterdam'],['photos/amsterdam-IMG_7072.jpg','Amsterdam'],['photos/amsterdam-IMG_9679.jpg','Amsterdam']],
+  london:     [['photos/london-IMG_9812.jpg','London'],['photos/london-IMG_9822.jpg','London'],['photos/london-IMG_9838.jpg','London']],
+  zurich:     [['photos/zurich-IMG_7033.jpg','Zurich'],['photos/zurich-IMG_7034.jpg','Zurich']],
 };
+
+// Annotate photo tag buttons with count badge when multiple photos exist
+document.querySelectorAll('.photo-tag[onclick]').forEach(btn => {
+  const m = btn.getAttribute('onclick').match(/openGallery\('(\w+)'/);
+  if (m && galleries[m[1]] && galleries[m[1]].length > 1) {
+    btn.dataset.count = galleries[m[1]].length;
+  }
+});
 
 let currentGallery = [];
 let currentIndex = 0;
