@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>what AI actually runs on / Cedric Turner II</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --text: #1c1c1c;
+    --muted: #777;
+    --faint: #aaa;
+    --bg: #fafaf9;
+    --rule: #e8e5e0;
+    --bg-lift: #f4f1ed;
+    --dbt-bg: #eff6ff;
+    --dbt-border: #93c5fd;
+    --dbt-text: #1d4ed8;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+    padding: 0 24px 120px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 620px; margin: 0 auto; }
+
+  /* nav */
+  nav { padding: 40px 0 60px; font-size: 13px; }
+  nav a { color: var(--muted); text-decoration: none; }
+  nav a:hover { color: var(--text); }
+
+  /* hero */
+  .hero { padding-bottom: 56px; border-bottom: 1px solid var(--rule); margin-bottom: 64px; }
+  .hero h1 { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 10px; }
+  .hero .tag {
+    display: inline-block;
+    font-size: 11px;
+    color: var(--faint);
+    letter-spacing: 0.04em;
+    margin-bottom: 20px;
+  }
+  .hero .lede {
+    font-size: 16px;
+    color: #555;
+    line-height: 1.75;
+    max-width: 540px;
+  }
+
+  /* sections */
+  .section { margin-bottom: 72px; }
+
+  .section-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--faint);
+    margin-bottom: 18px;
+  }
+
+  .section h2 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+    line-height: 1.3;
+  }
+
+  p { font-size: 16px; color: #2a2a2a; line-height: 1.8; margin-bottom: 20px; }
+  p:last-child { margin-bottom: 0; }
+
+  /* ── THE SYSTEM DIAGRAM ─────────────────────────── */
+
+  .system-diagram {
+    margin: 36px 0;
+    overflow-x: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .system-diagram::-webkit-scrollbar { display: none; }
+
+  .system-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    min-width: min-content;
+  }
+
+  .sys-node {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    width: 128px;
+  }
+
+  .sys-box {
+    border: 1.5px solid var(--rule);
+    background: #fff;
+    padding: 14px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+  }
+
+  .sys-box.dbt {
+    background: var(--dbt-bg);
+    border-color: var(--dbt-border);
+  }
+
+  .sys-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .sys-box.dbt .sys-name { color: var(--dbt-text); }
+
+  .sys-analogy {
+    font-size: 11px;
+    color: var(--faint);
+    line-height: 1.4;
+  }
+
+  .sys-desc {
+    font-size: 11.5px;
+    color: #666;
+    line-height: 1.5;
+    margin-top: 4px;
+  }
+
+  .sys-dbt-tag {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--dbt-text);
+    background: #dbeafe;
+    padding: 2px 6px;
+    border-radius: 2px;
+    margin-top: 4px;
+    align-self: flex-start;
+  }
+
+  .sys-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+    flex-shrink: 0;
+    color: var(--faint);
+    font-size: 16px;
+  }
+
+  /* ── BEFORE / AFTER ─────────────────────────────── */
+
+  .before-after {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 1.5px solid var(--rule);
+    margin: 28px 0;
+    overflow: hidden;
+  }
+
+  .ba-side { padding: 20px; }
+  .ba-side + .ba-side { border-left: 1.5px solid var(--rule); }
+
+  .ba-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--faint);
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .ba-line {
+    font-size: 14px;
+    color: #444;
+    line-height: 1.6;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 8px;
+  }
+  .ba-line:last-child { margin-bottom: 0; }
+
+  .ba-line .dot {
+    color: var(--faint);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ── WHERE THINGS BREAK ─────────────────────────── */
+
+  .break-list {
+    margin: 24px 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .break-item {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .break-scenario {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--faint);
+    margin-bottom: 8px;
+  }
+
+  .break-item p {
+    font-size: 15px;
+    color: #444;
+    margin: 0;
+    line-height: 1.7;
+  }
+
+  .break-item .punchline {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 8px;
+    font-style: italic;
+  }
+
+  /* ── HOW TO TALK ABOUT THIS ─────────────────────── */
+
+  .talk-card {
+    background: var(--bg-lift);
+    border: 1.5px solid var(--rule);
+    padding: 28px;
+    margin: 28px 0;
+  }
+
+  .talk-card-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--faint);
+    margin-bottom: 24px;
+  }
+
+  .talk-list { list-style: none; }
+
+  .talk-item {
+    padding: 16px 0;
+    border-top: 1px solid var(--rule);
+  }
+  .talk-item:first-child { border-top: none; padding-top: 0; }
+
+  .talk-line {
+    font-size: 15.5px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.45;
+    margin-bottom: 5px;
+  }
+
+  .talk-context {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  /* callout */
+  .callout {
+    border-left: 3px solid var(--rule);
+    padding: 14px 18px;
+    margin: 28px 0;
+    background: #fff;
+  }
+  .callout p { font-size: 14px; color: var(--muted); margin: 0; line-height: 1.7; }
+
+  /* go deeper links */
+  .go-deeper {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 20px;
+  }
+  .go-deeper a {
+    color: var(--text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .go-deeper a:hover { color: var(--muted); }
+
+  /* footer */
+  .footer-note {
+    margin-top: 80px;
+    padding-top: 28px;
+    border-top: 1px solid var(--rule);
+    font-size: 12px;
+    color: var(--faint);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav><a href="/me/">← cedric turner ii</a></nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1>what AI actually runs on</h1>
+    <span class="tag">for anyone in a conversation about AI + data</span>
+    <p class="lede">
+      AI isn't magic. It reads data. And if the data underneath it is inconsistent, undefined, or scattered across a dozen systems, the AI will be too. This is a quick explanation of what's actually going on, and how to talk about it.
+    </p>
+  </div>
+
+
+  <!-- 1. THE SHIFT -->
+  <div class="section">
+    <div class="section-label">01 / the shift</div>
+    <h2>the interface changed. the problem didn't.</h2>
+
+    <p>
+      A few years ago, when someone had a question about the business, they'd pull up a dashboard or ask an analyst to build one.
+    </p>
+    <p>
+      Now they're asking AI directly, in plain English, and they expect an answer in seconds.
+    </p>
+    <p>
+      The interface changed, but the data underneath still has to answer the question and still has to be right. That's the part most people skip over.
+    </p>
+
+    <div class="before-after">
+      <div class="ba-side">
+        <div class="ba-label">then</div>
+        <div class="ba-line"><span class="dot">·</span>someone has a question</div>
+        <div class="ba-line"><span class="dot">·</span>analyst writes SQL</div>
+        <div class="ba-line"><span class="dot">·</span>dashboard shows the answer</div>
+        <div class="ba-line"><span class="dot">·</span>person decides</div>
+      </div>
+      <div class="ba-side">
+        <div class="ba-label">now</div>
+        <div class="ba-line"><span class="dot">·</span>someone has a question</div>
+        <div class="ba-line"><span class="dot">·</span>asks AI in plain language</div>
+        <div class="ba-line"><span class="dot">·</span>AI reads data and responds</div>
+        <div class="ba-line"><span class="dot">·</span>person decides</div>
+      </div>
+    </div>
+
+    <p>
+      The middle steps look different, but they still depend on the same thing: data that is clean, defined, and trustworthy.
+    </p>
+    <p class="go-deeper">If you want to think through what this shift actually means for how people work: <a href="../blog/ai-forces-preference/">ai forces preference →</a></p>
+  </div>
+
+
+  <!-- 2. THE SYSTEM -->
+  <div class="section">
+    <div class="section-label">02 / the system</div>
+    <h2>there is a system. most people only see the top of it.</h2>
+
+    <p>
+      Think of it like a restaurant kitchen. Before a chef can cook, someone has to bring in the ingredients, do all the prep work, and write out the recipes. The chef, no matter how talented, can only work with what's in front of them.
+    </p>
+    <p>
+      Data works the same way. There are four layers, and AI sits at the top of them.
+    </p>
+
+    <div class="system-diagram">
+      <div class="system-row">
+
+        <div class="sys-node">
+          <div class="sys-box">
+            <div class="sys-name">raw data</div>
+            <div class="sys-analogy">the ingredients</div>
+            <div class="sys-desc">scattered across every system: CRM, databases, spreadsheets, third-party tools. Rarely consistent or labeled.</div>
+          </div>
+        </div>
+
+        <div class="sys-arrow">→</div>
+
+        <div class="sys-node">
+          <div class="sys-box dbt">
+            <div class="sys-name">transformation</div>
+            <div class="sys-analogy">the prep kitchen</div>
+            <div class="sys-desc">data gets cleaned, organized, and given definitions that mean the same thing everywhere.</div>
+            <div class="sys-dbt-tag">dbt lives here</div>
+          </div>
+        </div>
+
+        <div class="sys-arrow">→</div>
+
+        <div class="sys-node">
+          <div class="sys-box">
+            <div class="sys-name">context</div>
+            <div class="sys-analogy">the recipe cards</div>
+            <div class="sys-desc">metrics and definitions. "revenue" means exactly this. "churn" is calculated exactly this way.</div>
+          </div>
+        </div>
+
+        <div class="sys-arrow">→</div>
+
+        <div class="sys-node">
+          <div class="sys-box">
+            <div class="sys-name">AI / apps</div>
+            <div class="sys-analogy">the chef</div>
+            <div class="sys-desc">reads everything below it and is only as smart as what it's reading.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <p>
+      Most conversations about AI are about the chef. They're impressive. But a fast chef with bad ingredients still makes bad food.
+    </p>
+
+    <div class="callout">
+      <p>The companies getting real value from AI aren't necessarily using better models. They've done the prep work the others haven't.</p>
+    </div>
+  </div>
+
+
+  <!-- 3. WHERE THINGS BREAK -->
+  <div class="section">
+    <div class="section-label">03 / where things break</div>
+    <h2>most AI problems are actually data problems.</h2>
+
+    <p>
+      When AI gives a bad answer, the instinct is to blame the model, switch to a different one, tune the prompts, or try a different product. But usually that's not where the problem is.
+    </p>
+
+    <div class="break-list">
+
+      <div class="break-item">
+        <div class="break-scenario">scenario 1 · conflicting definitions</div>
+        <p>Sales defines revenue as bookings. Finance defines it as recognized revenue. The AI gets asked for "revenue." It picks one definition, or worse, it tries to reconcile two inconsistent sources. Nobody agrees with the answer.</p>
+        <p class="punchline">The AI isn't wrong. The company never agreed on what "revenue" meant.</p>
+      </div>
+
+      <div class="break-item">
+        <div class="break-scenario">scenario 2 · logic scattered everywhere</div>
+        <p>Churn is calculated slightly differently in Salesforce, in the data warehouse, and in the BI tool. The AI pulls from whichever one is easiest to reach. The number it returns is technically from the data, but nobody can explain how it got there.</p>
+        <p class="punchline">The AI did exactly what it was supposed to. The system underneath it wasn't consistent.</p>
+      </div>
+
+      <div class="break-item">
+        <div class="break-scenario">scenario 3 · answers that don't match the dashboard</div>
+        <p>An exec asks AI to summarize performance. The numbers don't match the BI dashboard. Both are reading the same underlying data. Everyone loses confidence in both.</p>
+        <p class="punchline">Two systems reading the same raw data can produce different answers if neither of them agree on definitions.</p>
+      </div>
+
+    </div>
+
+    <p>
+      These aren't AI problems, they're data shape problems. The AI just made them more visible.
+    </p>
+  </div>
+
+
+  <!-- 4. WHERE dbt FITS -->
+  <div class="section">
+    <div class="section-label">04 / where dbt fits</div>
+    <h2>dbt is the prep kitchen.</h2>
+
+    <p>
+      dbt sits between raw data and everything that uses it. Its job is to take scattered, inconsistent source data and turn it into something reliable.
+    </p>
+    <p>
+      It's not a BI tool or a database, it doesn't store your data or show you charts. It does one thing: makes raw data usable and trustworthy.
+    </p>
+
+    <div class="before-after">
+      <div class="ba-side">
+        <div class="ba-label">without dbt</div>
+        <div class="ba-line"><span class="dot">·</span>"revenue" means different things in different systems</div>
+        <div class="ba-line"><span class="dot">·</span>business logic lives in spreadsheets, BI tools, and someone's head</div>
+        <div class="ba-line"><span class="dot">·</span>AI reads whatever it can find and does its best</div>
+        <div class="ba-line"><span class="dot">·</span>the answer is fast and confident, and may be wrong</div>
+      </div>
+      <div class="ba-side">
+        <div class="ba-label">with dbt</div>
+        <div class="ba-line"><span class="dot">·</span>"revenue" has one definition, tested automatically</div>
+        <div class="ba-line"><span class="dot">·</span>business logic lives in one place, versioned and documented</div>
+        <div class="ba-line"><span class="dot">·</span>AI reads what dbt made trustworthy</div>
+        <div class="ba-line"><span class="dot">·</span>the answer is fast and confident, and is actually right</div>
+      </div>
+    </div>
+
+    <p>
+      AI doesn't write its own definitions, it reads the ones that already exist. dbt is where those definitions get written and enforced, and that's why it matters.
+    </p>
+
+    <div class="callout">
+      <p>When someone buys an AI product, they're buying the chef, and dbt is the prep kitchen. You need both, and most teams figure that out after the chef shows up and there's nothing ready to cook.</p>
+    </div>
+    <p class="go-deeper">For the longer argument on why dbt Core alone isn't enough once AI agents are in the picture: <a href="https://cedricturner.github.io/dbt-perspectives/posts/is-dbt-core-enough/" target="_blank" rel="noopener">is dbt core enough in the age of AI →</a></p>
+  </div>
+
+
+  <!-- 5. HOW TO TALK ABOUT THIS -->
+  <div class="section">
+    <div class="section-label">05 / how to talk about this</div>
+    <h2>lines you can actually use.</h2>
+
+    <p>
+      These are reframes and openers, not scripts. Use whichever ones fit the conversation.
+    </p>
+
+    <div class="talk-card">
+      <div class="talk-card-label">for AEs · pull these out as needed</div>
+      <ul class="talk-list">
+
+        <li class="talk-item">
+          <div class="talk-line">"You don't have an AI problem. You have a data trust problem."</div>
+          <div class="talk-context">Use this when they're frustrated that AI gives them different answers to the same question. It reframes where the real fix needs to happen.</div>
+        </li>
+
+        <li class="talk-item">
+          <div class="talk-line">"AI is only as smart as the data it's reading. Right now, is that data defined the same way everywhere?"</div>
+          <div class="talk-context">Good discovery question. Most people pause here. Opens a real conversation about where their definitions live.</div>
+        </li>
+
+        <li class="talk-item">
+          <div class="talk-line">"Think of AI like a really fast new hire. If you give them bad instructions, they execute bad instructions really fast."</div>
+          <div class="talk-context">Works with any audience, technical or not. Immediately makes data quality feel urgent instead of abstract.</div>
+        </li>
+
+        <li class="talk-item">
+          <div class="talk-line">"When your AI and your dashboard show different numbers, that's not an AI problem. That's a definitions problem."</div>
+          <div class="talk-context">Very specific. If they've experienced this (they almost always have), it lands immediately.</div>
+        </li>
+
+        <li class="talk-item">
+          <div class="talk-line">"Most companies are trying to build the AI layer before they've built the data layer. dbt is the data layer."</div>
+          <div class="talk-context">Positions dbt as the foundation, not an add-on. Changes the framing from "do we need this?" to "we need this first."</div>
+        </li>
+
+        <li class="talk-item">
+          <div class="talk-line">"Every AI vendor is selling you the chef. dbt is the prep kitchen. You need both."</div>
+          <div class="talk-context">Use after you've explained the system. Makes the kitchen analogy stick and makes the dependency clear.</div>
+        </li>
+
+        <li class="talk-item">
+          <div class="talk-line">"The question isn't whether you're using AI. It's what your AI is actually reading."</div>
+          <div class="talk-context">Good for executive conversations where the focus is on AI adoption. Shifts attention to the foundation underneath.</div>
+        </li>
+
+        <li class="talk-item">
+          <div class="talk-line">"Where does 'revenue' live in your system right now? How many places is it defined?"</div>
+          <div class="talk-context">Ask this and wait. If they can't answer quickly, the problem is real. This is discovery, not a pitch.</div>
+        </li>
+
+      </ul>
+    </div>
+  </div>
+
+
+  <div class="footer-note">
+    by <a href="/me/" style="color:inherit;text-decoration:underline;text-underline-offset:3px">Cedric Turner II</a> · May 2026
+  </div>
+
+</div>
+</body>
+</html>
